@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Formulário de Orçamento</h1>
+    
+    <form id="orcamentoForm" method="POST" action="{{ url_for('processar_formulario') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Informações do Cliente</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="cliente_email" class="form-label">E-mail para contato:</label>
+                    <input type="email" class="form-control" id="cliente_email" name="cliente_email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="empresa" class="form-label">Empresa:</label>
+                    <input type="text" class="form-control" id="empresa" name="empresa" value="BR Produções" required>
+                </div>
+            </div>
+        </div>
+
+        <div id="servicos-container">
+            <!-- Aqui serão adicionados os serviços -->
+            <div class="card mb-4 servico-card" id="servico-1">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Serviço (1):</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Etapa 1: Seleção do Serviço -->
+                    <div class="mb-3">
+                        <label for="servico-1-nome" class="form-label">Selecione um serviço:</label>
+                        <select class="form-select servico-select" id="servico-1-nome" name="servicos[0][nome]" required onchange="mostrarCamposAdicionais(1)">
+                            <option value="">Selecione um serviço</option>
+                            {% for servico in servicos %}
+                            <option value="{{ servico }}">{{ servico }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Etapa 2: Parâmetros Específicos para PGR -->
+                    <div id="parametros-pgr-1" class="parametros-pgr" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Grau de Risco:</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check grau-risco" name="servicos[0][grau_risco]" id="grauRisco1e2-1" value="1 e 2" checked onchange="atualizarPreco(1)">
+                                <label class="btn btn-outline-primary" for="grauRisco1e2-1">1 e 2</label>
+                                
+                                <input type="radio" class="btn-check grau-risco" name="servicos[0][grau_risco]" id="grauRisco3e4-1" value="3 e 4" onchange="atualizarPreco(1)">
+                                <label class="btn btn-outline-primary" for="grauRisco3e4-1">3 e 4</label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="numTrabalhadores-1" class="form-label">Número de Trabalhadores:</label>
+                            <select class="form-select num-trabalhadores" id="numTrabalhadores-1" name="servicos[0][num_trabalhadores]" onchange="atualizarPreco(1)">
+                                <option value="">Selecione a faixa</option>
+                                <option value="ate19">Até 19 Trabalhadores</option>
+                                <option value="20a50">20 a 50 Trabalhadores</option>
+                                <option value="51a100">51 a 100 Trabalhadores</option>
+                                <option value="101a160">101 a 160 Trabalhadores</option>
+                                <option value="161a250">161 a 250 Trabalhadores</option>
+                                <option value="251a300">251 a 300 Trabalhadores</option>
+                                <option value="301a350">301 a 350 Trabalhadores</option>
+                                <option value="351a400">351 a 400 Trabalhadores</option>
+                                <option value="401a450">401 a 450 Trabalhadores</option>
+                                <option value="451a500">451 a 500 Trabalhadores</option>
+                                <option value="501a550">501 a 550 Trabalhadores</option>
+                                <option value="551a600">551 a 600 Trabalhadores</option>
+                                <option value="601a650">601 a 650 Trabalhadores</option>
+                                <option value="651a700">651 a 700 Trabalhadores</option>
+                                <option value="701a750">701 a 750 Trabalhadores</option>
+                                <option value="751a800">751 a 800 Trabalhadores</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Campos comuns para todos os serviços -->
+                    <div class="mb-3">
+                        <label for="regiao-1" class="form-label">Região:</label>
+                        <select class="form-select regiao-select" id="regiao-1" name="servicos[0][regiao]" required onchange="atualizarPreco(1)">
+                            <option value="">Selecione a região</option>
+                            <option value="Central">Central</option>
+                            <option value="Norte">Norte</option>
+                            <option value="Oeste">Oeste</option>
+                            <option value="Sudoeste">Sudoeste</option>
+                            <option value="Sul">Sul</option>
+                            <option value="Extremo Sul">Extremo Sul</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="quantidade-1" class="form-label">Quantidade:</label>
+                        <input type="number" class="form-control quantidade-input" id="quantidade-1" name="servicos[0][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(1)">
+                    </div>
+                    
+                    <!-- Etapa 3: Visualização do Preço -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Preço Unitário:</h5>
+                                    <h4 class="card-text preco-unitario" id="precoUnitario-1">R$ 0,00</h4>
+                                    <input type="hidden" id="precoUnitarioHidden-1" name="servicos[0][preco_unitario]" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Preço Total:</h5>
+                                    <h4 class="card-text preco-total" id="precoTotal-1">R$ 0,00</h4>
+                                    <input type="hidden" id="precoTotalHidden-1" name="servicos[0][preco_total]" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mb-4">
+            <button type="button" class="btn btn-success" id="adicionarServico">
+                <i class="bi bi-plus-circle"></i> Adicionar Serviço
+            </button>
+            <button type="button" class="btn btn-danger" id="removerServico" style="display: none;">
+                <i class="bi bi-trash"></i> Remover Último Serviço
+            </button>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Total do Orçamento</h3>
+            </div>
+            <div class="card-body">
+                <h2 class="text-end" id="totalOrcamento">R$ 0,00</h2>
+                <input type="hidden" id="totalOrcamentoHidden" name="total_orcamento" value="0">
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">Gerar Orçamento</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

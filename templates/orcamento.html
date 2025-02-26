@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Resultado do orçamento para serviços de saúde e segurança ocupacional">
+    <title>Orçamento</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .orcamento-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .orcamento-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .orcamento-info {
+            margin-bottom: 20px;
+        }
+        
+        .orcamento-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        .orcamento-table th, .orcamento-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .orcamento-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        .orcamento-total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .orcamento-footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+    </style>
+</head>
+<body>
+    <div class="orcamento-container">
+        <div class="orcamento-header">
+            <h1>Orçamento de Serviços</h1>
+            <p>Data: {{ data_orcamento }}</p>
+        </div>
+        
+        <div class="orcamento-info">
+            {% if cliente_email %}
+            <p><strong>E-mail para contato:</strong> {{ cliente_email }}</p>
+            {% endif %}
+        </div>
+        
+        <table class="orcamento-table">
+            <thead>
+                <tr>
+                    <th>Serviço</th>
+                    <th>Empresa</th>
+                    <th>Quantidade</th>
+                    <th>Valor Unitário</th>
+                    <th>Valor Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servico in servicos %}
+                <tr>
+                    <td>{{ servico.nome }}</td>
+                    <td>{{ servico.empresa }}</td>
+                    <td>{{ servico.quantidade }} {{ servico.unidade }}</td>
+                    <td>{{ servico.preco_unitario_formatado }}</td>
+                    <td>{{ servico.preco_total_formatado }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="orcamento-total">
+            <p>Total: {{ total_orcamento }}</p>
+        </div>
+        
+        <div class="orcamento-footer">
+            <p>Este orçamento é válido por 30 dias a partir da data de emissão.</p>
+            <p>Para mais informações, entre em contato via <a href="https://wa.me/5571987075563" target="_blank" rel="noopener">WhatsApp (71) 9 8707-5563</a></p>
+        </div>
+        
+        <div class="btn-container">
+            <a href="{{ url_for('formulario') }}" class="btn">Novo Orçamento</a>
+            {% if cliente_email %}
+            <form method="POST" action="{{ url_for('enviar_orcamento') }}" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success">Enviar por E-mail</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
