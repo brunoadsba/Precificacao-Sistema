@@ -614,7 +614,7 @@ def enviar_orcamento():
                 <p>Para mais informações ou para aceitar este orçamento, entre em contato conosco:</p>
                 <p>WhatsApp: <a href="https://wa.me/5571987075563">(71) 9 8707-5563</a></p>
                 <a href="https://wa.me/5571987075563" class="contact-button">Falar com um consultor</a>
-                <p>&copy; {datetime.now().year} BR Produções. Todos os direitos reservados.</p>
+                <p>© {datetime.now().year} BR Produções. Todos os direitos reservados.</p>
             </div>
         </div>
     </body>
@@ -790,5 +790,9 @@ def enviar_email(orcamento_id):
     
     return redirect(url_for('orcamento', orcamento_id=orcamento_id))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Configuração para Vercel (rodar na porta 3000 com waitress)
+import os
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 3000))
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=port)
