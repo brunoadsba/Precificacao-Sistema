@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import pandas as pd
 import os
 from datetime import datetime
-import locale
 from flask_wtf.csrf import CSRFProtect
 import pathlib
 import smtplib
@@ -13,12 +12,10 @@ import re
 from dotenv import load_dotenv
 from config import Config
 from services.email_sender import init_mail, enviar_email_orcamento
+from babel.numbers import format_currency  # Nova importação para formatação de moeda
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
-
-# Configuração do locale para formatação de moeda
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 # Implementação direta da função de envio de e-mail
 def enviar_email_orcamento(destinatario, assunto, corpo):
@@ -355,12 +352,12 @@ def orcamento():
     print(f"Serviços: {servicos}")
     print(f"Total: {total_orcamento}")
     
-    # Formata os valores monetários
+    # Formata os valores monetários com babel
     for servico in servicos:
-        servico['preco_unitario_formatado'] = locale.currency(servico['preco_unitario'], grouping=True)
-        servico['preco_total_formatado'] = locale.currency(servico['preco_total'], grouping=True)
+        servico['preco_unitario_formatado'] = format_currency(servico['preco_unitario'], 'BRL', locale='pt_BR')
+        servico['preco_total_formatado'] = format_currency(servico['preco_total'], 'BRL', locale='pt_BR')
     
-    total_formatado = locale.currency(total_orcamento, grouping=True)
+    total_formatado = format_currency(total_orcamento, 'BRL', locale='pt_BR')
     
     return render_template(
         'orcamento.html', 
@@ -397,11 +394,11 @@ def enviar_orcamento():
     servicos_formatados = []
     for servico in servicos:
         servico_formatado = servico.copy()  # Cria uma cópia para não modificar o original na sessão
-        servico_formatado['preco_unitario_formatado'] = locale.currency(servico['preco_unitario'], grouping=True)
-        servico_formatado['preco_total_formatado'] = locale.currency(servico['preco_total'], grouping=True)
+        servico_formatado['preco_unitario_formatado'] = format_currency(servico['preco_unitario'], 'BRL', locale='pt_BR')
+        servico_formatado['preco_total_formatado'] = format_currency(servico['preco_total'], 'BRL', locale='pt_BR')
         servicos_formatados.append(servico_formatado)
     
-    total_formatado = locale.currency(total_orcamento, grouping=True)
+    total_formatado = format_currency(total_orcamento, 'BRL', locale='pt_BR')
     
     # Cria o corpo do e-mail com design profissional
     corpo_email = f"""
