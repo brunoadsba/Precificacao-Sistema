@@ -23,14 +23,14 @@
     {% for servico in servicos %}
     <div class="servico-resumo">
         <h3>Serviço {{ loop.index }}</h3>
-        <p><strong>Serviço:</strong> {{ servico.servico }}</p>
+        <p><strong>Serviço:</strong> {{ servico.nome }}</p> <!-- Atualizado para 'nome' em vez de 'servico' -->
         <p><strong>Detalhes:</strong> {{ servico.detalhes }}</p>
         <p><strong>Quantidade:</strong> {{ servico.quantidade }}</p>
         <p><strong>Unidade:</strong> {{ servico.unidade }}</p>
         <p><strong>Região:</strong> {{ servico.regiao }}</p>
-        <p><strong>Nome da Empresa:</strong> {{ servico.nome_empresa }}</p>
-        <p><strong>Grau de Risco:</strong> {{ servico.grau_risco }}</p>
-        <p><strong>Variável:</strong> {{ servico.variavel }}</p>
+        <p><strong>Nome da Empresa:</strong> {{ empresa_cliente }}</p> <!-- Atualizado para 'empresa_cliente' -->
+        <p><strong>Grau de Risco:</strong> {{ servico.grau_risco if servico.grau_risco else 'Não aplicável' }}</p>
+        <p><strong>Variável:</strong> {{ servico.num_trabalhadores if servico.num_trabalhadores else 'Não aplicável' }}</p> <!-- Assumindo que 'variavel' é 'num_trabalhadores' para PGR -->
     </div>
     {% endfor %}
     

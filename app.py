@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, json
 import pandas as pd
 import os
 from datetime import datetime
@@ -260,6 +260,7 @@ def formulario():
             session.pop('data_orcamento', None)
             
             cliente_email = request.form.get('cliente_email', '')
+            empresa_cliente = request.form.get('empresa', 'BR Produções')  # Captura o nome da empresa do cliente
             
             # Extrair os serviços do formulário
             servicos = []
@@ -269,7 +270,7 @@ def formulario():
             detalhes = request.form.getlist('detalhes')
             quantidades = request.form.getlist('quantidade')
             unidades = request.form.getlist('unidade')
-            empresas = request.form.getlist('nome_empresa')
+            empresas = request.form.getlist('servicos[][empresa]')  # Captura empresas específicas dos serviços, se houver
             regioes = request.form.getlist('regiao')  # Adicionado para capturar as regiões
             
             # Debug: imprima os dados recebidos
@@ -291,7 +292,7 @@ def formulario():
                 detalhe = detalhes[i] if i < len(detalhes) else ""
                 quantidade = int(quantidades[i]) if i < len(quantidades) and quantidades[i].isdigit() else 1
                 unidade = unidades[i] if i < len(unidades) else ""
-                empresa = empresas[i] if i < len(empresas) else ""
+                empresa = empresas[i] if i < len(empresas) and empresas[i] else empresa_cliente  # Usa a empresa do cliente como padrão
                 regiao = regioes[i] if i < len(regioes) else "Central"  # Usa a região selecionada ou Central como padrão
                 
                 # Calcula o preço usando a função que busca na planilha
@@ -309,7 +310,7 @@ def formulario():
                     'unidade': unidade,
                     'preco_unitario': preco_unitario,
                     'preco_total': preco_total,
-                    'empresa': empresa,
+                    'empresa': empresa,  # Armazena o nome da empresa para cada serviço
                     'regiao': regiao
                 })
             
@@ -318,12 +319,13 @@ def formulario():
             
             # Armazena na sessão para uso na página de orçamento
             session['cliente_email'] = cliente_email
+            session['empresa_cliente'] = empresa_cliente  # Armazena o nome da empresa do cliente
             session['servicos'] = servicos
             session['total_orcamento'] = total_orcamento
             session['data_orcamento'] = datetime.now().strftime('%d/%m/%Y')
             
-            # Redireciona para a página de orçamento
-            return redirect(url_for('orcamento'))
+            # Redireciona para a página de resumo
+            return redirect(url_for('resumo'))
             
         except Exception as e:
             print(f"Erro ao processar o formulário: {e}")
@@ -334,66 +336,36 @@ def formulario():
     servicos = obter_servicos()
     return render_template('formulario.html', servicos=servicos)
 
-@app.route('/orcamento')
-def orcamento():
-    """Renderiza a página de orçamento com base nos dados da sessão"""
-    if 'servicos' not in session:
+@app.route('/resumo')
+def resumo():
+    """Renderiza o resumo dos serviços antes de gerar o orçamento"""
+    if 'servicos' not in session or 'cliente_email' not in session:
         flash("Dados de orçamento não encontrados. Por favor, preencha o formulário novamente.")
         return redirect(url_for('formulario'))
     
-    # Recupera os dados da sessão
     cliente_email = session.get('cliente_email', '')
+    empresa_cliente = session.get('empresa_cliente', 'BR Produções')
     servicos = session.get('servicos', [])
-    total_orcamento = session.get('total_orcamento', 0)
-    data_orcamento = session.get('data_orcamento', datetime.now().strftime('%d/%m/%Y'))
     
-    print(f"Dados recuperados da sessão:")
-    print(f"Cliente email: {cliente_email}")
-    print(f"Serviços: {servicos}")
-    print(f"Total: {total_orcamento}")
-    
-    # Formata os valores monetários com babel
-    for servico in servicos:
-        servico['preco_unitario_formatado'] = format_currency(servico['preco_unitario'], 'BRL', locale='pt_BR')
-        servico['preco_total_formatado'] = format_currency(servico['preco_total'], 'BRL', locale='pt_BR')
-    
-    total_formatado = format_currency(total_orcamento, 'BRL', locale='pt_BR')
-    
-    return render_template(
-        'orcamento.html', 
-        cliente_email=cliente_email,
-        servicos=servicos, 
-        total_orcamento=total_formatado,
-        data_orcamento=data_orcamento
-    )
+    return render_template('resumo.html', email=cliente_email, servicos=servicos, empresa=empresa_cliente)
 
-@app.route('/enviar_orcamento', methods=['POST'])
-def enviar_orcamento():
-    """Envia o orçamento por e-mail para o cliente"""
-    if 'servicos' not in session:
+@app.route('/gerar_orcamento', methods=['POST'])
+def gerar_orcamento():
+    """Gera o orçamento e envia por e-mail com base nos dados do resumo"""
+    if 'servicos' not in session or 'cliente_email' not in session:
         flash("Dados de orçamento não encontrados. Por favor, preencha o formulário novamente.")
         return redirect(url_for('formulario'))
     
     cliente_email = session.get('cliente_email', '')
-    if not cliente_email:
-        flash("E-mail do cliente não fornecido. Não é possível enviar o orçamento.")
-        return redirect(url_for('orcamento'))
-    
-    # Recupera os dados da sessão
+    empresa_cliente = session.get('empresa_cliente', 'BR Produções')
     servicos = session.get('servicos', [])
     total_orcamento = session.get('total_orcamento', 0)
     data_orcamento = session.get('data_orcamento', datetime.now().strftime('%d/%m/%Y'))
     
-    # Imprime os dados para debug
-    print("Dados recuperados da sessão:")
-    print(f"Cliente email: {cliente_email}")
-    print(f"Serviços: {servicos}")
-    print(f"Total: {total_orcamento}")
-    
-    # Formata os valores monetários para o e-mail
+    # Formata os serviços para o e-mail
     servicos_formatados = []
     for servico in servicos:
-        servico_formatado = servico.copy()  # Cria uma cópia para não modificar o original na sessão
+        servico_formatado = servico.copy()
         servico_formatado['preco_unitario_formatado'] = format_currency(servico['preco_unitario'], 'BRL', locale='pt_BR')
         servico_formatado['preco_total_formatado'] = format_currency(servico['preco_total'], 'BRL', locale='pt_BR')
         servicos_formatados.append(servico_formatado)
@@ -563,6 +535,7 @@ def enviar_orcamento():
             
             <div class="client-info">
                 <p><strong>Cliente:</strong> {cliente_email}</p>
+                <p><strong>Empresa:</strong> {empresa_cliente}</p>  <!-- Adiciona o nome da empresa do cliente -->
             </div>
             
             <div class="services">
@@ -611,23 +584,22 @@ def enviar_orcamento():
                 <p>Para mais informações ou para aceitar este orçamento, entre em contato conosco:</p>
                 <p>WhatsApp: <a href="https://wa.me/5571987075563">(71) 9 8707-5563</a></p>
                 <a href="https://wa.me/5571987075563" class="contact-button">Falar com um consultor</a>
-                <p>© {datetime.now().year} BR Produções. Todos os direitos reservados.</p>
+                <p>© {datetime.now().year} {empresa_cliente or 'BR Produções'}. Todos os direitos reservados.</p>
             </div>
         </div>
     </body>
     </html>
     """
     
-    # Envia o e-mail
-    assunto = f"Orçamento de Serviços - {data_orcamento}"
-    enviado = enviar_email_orcamento(cliente_email, assunto, corpo_email)
+    # Envia o e-mail usando a função de email_sender.py
+    enviado = enviar_email_orcamento(cliente_email, empresa_cliente, servicos_formatados, total_orcamento)
     
-    if enviado:
+    if enviado[0]:  # Verifica se o primeiro elemento da tupla (sucesso) é True
         flash("Orçamento enviado com sucesso para o seu e-mail!")
         return redirect(url_for('confirmacao'))
     else:
-        flash("Erro ao enviar o orçamento por e-mail. Por favor, tente novamente.")
-        return redirect(url_for('orcamento'))
+        flash(f"Erro ao enviar o orçamento por e-mail: {enviado[1]}")  # Mostra a mensagem de erro
+        return redirect(url_for('resumo'))
 
 @app.route('/confirmacao')
 def confirmacao():
@@ -690,7 +662,7 @@ def processar_formulario():
     if request.method == 'POST':
         # Obtém os dados do formulário
         cliente_email = request.form.get('cliente_email', '')
-        empresa = request.form.get('empresa', 'BR Produções')
+        empresa_cliente = request.form.get('empresa', 'BR Produções')  # Captura o nome da empresa do cliente
         
         # Processa os serviços
         servicos_form = []
@@ -729,7 +701,7 @@ def processar_formulario():
             
             servico = {
                 'nome': nome,
-                'empresa': empresa,
+                'empresa': empresa_cliente,  # Usa a empresa do cliente como padrão
                 'regiao': regiao,
                 'quantidade': quantidade,
                 'unidade': 'contrato',
@@ -753,12 +725,12 @@ def processar_formulario():
         
         # Armazena os dados na sessão
         session['cliente_email'] = cliente_email
-        session['empresa'] = empresa
+        session['empresa_cliente'] = empresa_cliente  # Armazena o nome da empresa do cliente
         session['servicos'] = servicos_form
         session['total_orcamento'] = total_orcamento
         session['data_orcamento'] = datetime.now().strftime('%d/%m/%Y')
         
-        return redirect(url_for('orcamento'))
+        return redirect(url_for('resumo'))
     
     return redirect(url_for('formulario'))
 
