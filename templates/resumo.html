@@ -1,45 +1,157 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo da Solicitação</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* Adicione seus estilos aqui */
-        .servico-resumo {
-            border: 1px solid #444;
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #fff;
+            background-color: #1a1a1a; /* Fundo preto escuro */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #0d6efd; /* Azul escuro para o cabeçalho */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: white;
+        }
+
+        .client-info, .servico-resumo {
             margin-bottom: 20px;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.05); /* Fundo semi-transparente claro */
+            border-radius: 8px;
+            border: 1px solid #444;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .client-info p, .servico-resumo p {
+            margin: 0 0 10px;
+            color: #fff;
+        }
+
+        .servico-resumo h3 {
+            margin-top: 0;
+            color: #0d6efd; /* Azul escuro para títulos de serviços */
+            font-size: 18px;
+        }
+
+        .servico-resumo strong {
+            color: #0d6efd; /* Destaques em azul */
+        }
+
+        .buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .buttons button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .buttons button[type="button"] {
+            background-color: #6c757d; /* Cinza para o botão "Voltar e Editar" */
+            color: white;
+        }
+
+        .buttons button[type="button"]:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .buttons button[type="submit"] {
+            background-color: #28a745; /* Verde para o botão "Confirmar e Gerar Orçamento" */
+            color: white;
+        }
+
+        .buttons button[type="submit"]:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .client-info, .servico-resumo {
+                padding: 10px;
+            }
+
+            .buttons button {
+                padding: 10px 20px;
+                font-size: 14px;
+                margin: 5px;
+            }
         }
     </style>
 </head>
 <body>
-    <h2>Resumo da Solicitação</h2>
-    
-    {% if email %}
-    <p>E-mail para contato: {{ email }}</p>
-    {% endif %}
-    
-    {% for servico in servicos %}
-    <div class="servico-resumo">
-        <h3>Serviço {{ loop.index }}</h3>
-        <p><strong>Serviço:</strong> {{ servico.nome }}</p> <!-- Atualizado para 'nome' em vez de 'servico' -->
-        <p><strong>Detalhes:</strong> {{ servico.detalhes }}</p>
-        <p><strong>Quantidade:</strong> {{ servico.quantidade }}</p>
-        <p><strong>Unidade:</strong> {{ servico.unidade }}</p>
-        <p><strong>Região:</strong> {{ servico.regiao }}</p>
-        <p><strong>Nome da Empresa:</strong> {{ empresa_cliente }}</p> <!-- Atualizado para 'empresa_cliente' -->
-        <p><strong>Grau de Risco:</strong> {{ servico.grau_risco if servico.grau_risco else 'Não aplicável' }}</p>
-        <p><strong>Variável:</strong> {{ servico.num_trabalhadores if servico.num_trabalhadores else 'Não aplicável' }}</p> <!-- Assumindo que 'variavel' é 'num_trabalhadores' para PGR -->
-    </div>
-    {% endfor %}
-    
-    <form method="post" action="{{ url_for('gerar_orcamento') }}">
-        <input type="hidden" name="dados" value="{{ servicos|tojson }}">
-        <div class="buttons">
-            <button type="button" onclick="history.back()">Voltar e Editar</button>
-            <button type="submit">Confirmar e Gerar Orçamento</button>
+    <div class="container">
+        <div class="header">
+            <h2>Resumo da Solicitação</h2>
         </div>
-    </form>
+        
+        {% if email %}
+        <div class="client-info">
+            <p><strong>E-mail para contato:</strong> {{ email }}</p>
+            <p><strong>Nome da Empresa:</strong> {{ empresa_cliente if empresa_cliente else 'Não informado' }}</p>
+        </div>
+        {% endif %}
+        
+        {% for servico in servicos %}
+        <div class="servico-resumo">
+            <h3>Serviço {{ loop.index }}</h3>
+            <p><strong>Serviço:</strong> {{ servico.nome }}</p>
+            <p><strong>Detalhes:</strong> {{ servico.detalhes if servico.detalhes else 'Não informado' }}</p>
+            <p><strong>Quantidade:</strong> {{ servico.quantidade }}</p>
+            <p><strong>Unidade:</strong> {{ servico.unidade }}</p>
+            <p><strong>Região:</strong> {{ servico.regiao }}</p>
+            <p><strong>Nome da Empresa:</strong> {{ empresa_cliente if empresa_cliente else 'Não informado' }}</p>
+            <p><strong>Grau de Risco:</strong> {{ servico.grau_risco if servico.grau_risco else 'Não aplicável' }}</p>
+            <p><strong>Número de Trabalhadores:</strong> {{ servico.num_trabalhadores if servico.num_trabalhadores else 'Não aplicável' }}</p>
+        </div>
+        {% endfor %}
+        
+        <form method="post" action="{{ url_for('gerar_orcamento') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF corrigido -->
+            <input type="hidden" name="dados" value="{{ servicos|tojson }}">
+            <div class="buttons">
+                <button type="button" onclick="history.back()">Voltar e Editar</button>
+                <button type="submit">Confirmar e Gerar Orçamento</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

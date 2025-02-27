@@ -102,6 +102,9 @@
             {% if cliente_email %}
             <p><strong>E-mail para contato:</strong> {{ cliente_email }}</p>
             {% endif %}
+            {% if empresa_cliente %}
+            <p><strong>Empresa:</strong> {{ empresa_cliente }}</p>
+            {% endif %}
         </div>
         
         <table class="orcamento-table">
@@ -140,7 +143,7 @@
             <a href="{{ url_for('formulario') }}" class="btn">Novo Orçamento</a>
             {% if cliente_email %}
             <form method="POST" action="{{ url_for('enviar_orcamento') }}" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF corrigido -->
                 <button type="submit" class="btn btn-success">Enviar por E-mail</button>
             </form>
             {% endif %}

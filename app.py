@@ -30,6 +30,10 @@ def enviar_email_orcamento(destinatario, assunto, corpo):
         print(f"Tentando enviar e-mail para {destinatario}")
         print(f"Usando credenciais: {sender_email}")
         
+        # Verifica se as credenciais estão configuradas
+        if not sender_email or not password:
+            raise ValueError("Credenciais de e-mail (EMAIL_REMETENTE ou EMAIL_SENHA) não estão configuradas no .env")
+        
         # Cria a mensagem
         msg = MIMEMultipart()
         msg['From'] = sender_email
@@ -260,7 +264,7 @@ def formulario():
             session.pop('data_orcamento', None)
             
             cliente_email = request.form.get('cliente_email', '')
-            empresa_cliente = request.form.get('empresa', 'BR Produções')  # Captura o nome da empresa do cliente
+            empresa_cliente = request.form.get('empresa', '')  # Captura o nome da empresa do cliente, vazio por padrão
             
             # Extrair os serviços do formulário
             servicos = []
@@ -273,7 +277,9 @@ def formulario():
             empresas = request.form.getlist('servicos[][empresa]')  # Captura empresas específicas dos serviços, se houver
             regioes = request.form.getlist('regiao')  # Adicionado para capturar as regiões
             
-            # Debug: imprima os dados recebidos
+            # Debug: imprima os dados recebidos, incluindo empresa_cliente
+            print(f"Cliente email: {cliente_email}")
+            print(f"Empresa do cliente: {empresa_cliente}")
             print(f"Nomes: {nomes}")
             print(f"Detalhes: {detalhes}")
             print(f"Quantidades: {quantidades}")
@@ -344,10 +350,10 @@ def resumo():
         return redirect(url_for('formulario'))
     
     cliente_email = session.get('cliente_email', '')
-    empresa_cliente = session.get('empresa_cliente', 'BR Produções')
+    empresa_cliente = session.get('empresa_cliente', '')  # Pega o nome da empresa do cliente, vazio por padrão
     servicos = session.get('servicos', [])
     
-    return render_template('resumo.html', email=cliente_email, servicos=servicos, empresa=empresa_cliente)
+    return render_template('resumo.html', email=cliente_email, empresa_cliente=empresa_cliente, servicos=servicos)
 
 @app.route('/gerar_orcamento', methods=['POST'])
 def gerar_orcamento():
@@ -357,7 +363,7 @@ def gerar_orcamento():
         return redirect(url_for('formulario'))
     
     cliente_email = session.get('cliente_email', '')
-    empresa_cliente = session.get('empresa_cliente', 'BR Produções')
+    empresa_cliente = session.get('empresa_cliente', '')
     servicos = session.get('servicos', [])
     total_orcamento = session.get('total_orcamento', 0)
     data_orcamento = session.get('data_orcamento', datetime.now().strftime('%d/%m/%Y'))
@@ -535,7 +541,7 @@ def gerar_orcamento():
             
             <div class="client-info">
                 <p><strong>Cliente:</strong> {cliente_email}</p>
-                <p><strong>Empresa:</strong> {empresa_cliente}</p>  <!-- Adiciona o nome da empresa do cliente -->
+                <p><strong>Empresa:</strong> {empresa_cliente}</p>
             </div>
             
             <div class="services">
@@ -594,11 +600,11 @@ def gerar_orcamento():
     # Envia o e-mail usando a função de email_sender.py
     enviado = enviar_email_orcamento(cliente_email, empresa_cliente, servicos_formatados, total_orcamento)
     
-    if enviado[0]:  # Verifica se o primeiro elemento da tupla (sucesso) é True
+    if enviado:  # Simplificado para verificar apenas o retorno booleano
         flash("Orçamento enviado com sucesso para o seu e-mail!")
         return redirect(url_for('confirmacao'))
     else:
-        flash(f"Erro ao enviar o orçamento por e-mail: {enviado[1]}")  # Mostra a mensagem de erro
+        flash("Erro ao enviar o orçamento por e-mail. Por favor, verifique as credenciais no .env ou o servidor SMTP.")
         return redirect(url_for('resumo'))
 
 @app.route('/confirmacao')
@@ -662,7 +668,7 @@ def processar_formulario():
     if request.method == 'POST':
         # Obtém os dados do formulário
         cliente_email = request.form.get('cliente_email', '')
-        empresa_cliente = request.form.get('empresa', 'BR Produções')  # Captura o nome da empresa do cliente
+        empresa_cliente = request.form.get('empresa', '')  # Captura o nome da empresa do cliente, vazio por padrão
         
         # Processa os serviços
         servicos_form = []
