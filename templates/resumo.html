@@ -140,7 +140,7 @@
             <p><strong>Região:</strong> {{ servico.regiao }}</p>
             <p><strong>Nome da Empresa:</strong> {{ empresa_cliente if empresa_cliente else 'Não informado' }}</p>
             <p><strong>Grau de Risco:</strong> {{ servico.grau_risco if servico.grau_risco else 'Não aplicável' }}</p>
-            <p><strong>Número de Trabalhadores:</strong> {{ servico.num_trabalhadores if servico.num_trabalhadores else 'Não aplicável' }}</p>
+            <p><strong>Número de Trabalhadores:</strong> {% if servico.num_trabalhadores %}{{ servico.num_trabalhadores|replace('ate', 'Até ')|replace('a', ' a ') }}{% else %}Não aplicável{% endif %}</p>
         </div>
         {% endfor %}
         

@@ -33,7 +33,7 @@
                     <!-- Etapa 1: Seleção do Serviço -->
                     <div class="mb-3">
                         <label for="servico-1-nome" class="form-label">Selecione um serviço:</label>
-                        <select class="form-select servico-select" id="servico-1-nome" name="servicos[0][nome]" required onchange="mostrarCamposAdicionais(1)">
+                        <select class="form-select servico-select" id="servico-1-nome" name="servicos[0][nome]" required onchange="mostrarCamposAdicionais(1); atualizarPreco(1)">
                             <option value="">Selecione um serviço</option>
                             {% for servico in servicos %}
                             <option value="{{ servico }}">{{ servico }}</option>
@@ -80,9 +80,10 @@
                     
                     <!-- Campos comuns para todos os serviços -->
                     <div class="mb-3">
-                        <label for="regiao-1" class="form-label">Região:</label>
+                        <label for="regiao-1" class="form-label">Região/Instituto:</label>
                         <select class="form-select regiao-select" id="regiao-1" name="servicos[0][regiao]" required onchange="atualizarPreco(1)">
-                            <option value="">Selecione a região</option>
+                            <option value="">Selecione a região ou Instituto</option>
+                            <option value="Instituto">Instituto</option>
                             <option value="Central">Central</option>
                             <option value="Norte">Norte</option>
                             <option value="Oeste">Oeste</option>
@@ -91,7 +92,22 @@
                             <option value="Extremo Sul">Extremo Sul</option>
                         </select>
                     </div>
-                    
+
+                    <!-- Novo campo para Variável -->
+                    <div class="mb-3">
+                        <label for="variavel-1" class="form-label">Selecione a Variável:</label>
+                        <select class="form-select variavel-select" id="variavel-1" name="servicos[0][variavel]" onchange="atualizarPreco(1)">
+                            <option value="">Selecione uma variável</option>
+                            {% if variaveis_disponiveis.get(servico) %}
+                                {% for variavel in variaveis_disponiveis.get(servico, []) %}
+                                    <option value="{{ variavel }}">{{ variavel }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="">Nenhuma variável disponível</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label for="quantidade-1" class="form-label">Quantidade:</label>
                         <input type="number" class="form-control quantidade-input" id="quantidade-1" name="servicos[0][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(1)">
@@ -146,4 +162,6 @@
         </div>
     </form>
 </div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 {% endblock %}
