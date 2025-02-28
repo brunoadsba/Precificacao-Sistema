@@ -14,12 +14,19 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('formulario') }}">Sistema de Precificação</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="container d-flex justify-content-between align-items-center w-100">
+            <a class="navbar-brand d-flex align-items-center justify-content-center flex-grow-1" href="{{ url_for('formulario') }}">
+                <span class="title-main">Sistema de Precificação</span>
+            </a>
+            <div class="d-flex align-items-center">
+                <button id="themeToggle" class="btn btn-link text-white p-2" aria-label="Alternar modo claro/escuro">
+                    <i id="themeIcon" class="bi bi-moon-fill"></i>
+                </button>
+                <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('formulario') }}">Novo Orçamento</a>
@@ -55,6 +62,33 @@
     
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Script para alternar modo claro/escuro -->
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        // Verifica se o modo escuro está salvo no localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
+            themeIcon.classList.remove('bi-moon-fill');
+            themeIcon.classList.add('bi-sun-fill');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('bi-moon-fill');
+                themeIcon.classList.add('bi-sun-fill');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.classList.remove('bi-sun-fill');
+                themeIcon.classList.add('bi-moon-fill');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
     
     {% block scripts %}{% endblock %}
 </body>
