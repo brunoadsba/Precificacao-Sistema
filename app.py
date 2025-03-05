@@ -530,6 +530,29 @@ def enviar_email(orcamento_id):
     
     return redirect(url_for('orcamento', orcamento_id=orcamento_id))
 
+@app.route('/obter_variaveis')
+def obter_variaveis():
+    servico = request.args.get('servico', '')
+    
+    # Carregar os dados da planilha se ainda não foram carregados
+    if not hasattr(app, 'dados_excel') or app.dados_excel is None:
+        carregar_dados_excel()
+    
+    variaveis = []
+    
+    # Verificar se o serviço existe na tabela_5
+    if 'tabela_5' in app.dados_excel:
+        tabela_5 = app.dados_excel['tabela_5']
+        # Filtrar as variáveis para o serviço selecionado
+        for _, row in tabela_5.iterrows():
+            if row.get('Serviço') == servico and pd.notna(row.get('Variável')):
+                variaveis.append(row.get('Variável'))
+    
+    # Remover duplicatas e ordenar
+    variaveis = sorted(list(set(variaveis)))
+    
+    return jsonify({'variaveis': variaveis})
+
 # Configuração para Vercel
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 3000))

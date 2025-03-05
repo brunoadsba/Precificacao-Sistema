@@ -10,9 +10,45 @@ function mostrarCamposAdicionais(id) {
         parametrosPGR.style.display = 'block';
         atualizarPreco(id); // Atualiza o preço imediatamente
     } else {
-        parâmetrosPGR.style.display = 'none';
+        parametrosPGR.style.display = 'none';
         atualizarPreco(id); // Atualiza o preço para outros serviços
     }
+    
+    // Adicionar chamada para atualizar as variáveis disponíveis
+    atualizarVariaveisDisponiveis(id, servico);
+}
+
+// Adicionar nova função para atualizar as variáveis disponíveis
+function atualizarVariaveisDisponiveis(id, servico) {
+    // Fazer uma requisição para obter as variáveis disponíveis para o serviço selecionado
+    fetch(`/obter_variaveis?servico=${encodeURIComponent(servico)}`)
+        .then(response => response.json())
+        .then(data => {
+            const variavelSelect = document.getElementById(`variavel-${id}`);
+            // Limpar opções atuais
+            variavelSelect.innerHTML = '<option value="">Selecione uma variável</option>';
+            
+            // Adicionar novas opções
+            if (data.variaveis && data.variaveis.length > 0) {
+                data.variaveis.forEach(variavel => {
+                    const option = document.createElement('option');
+                    option.value = variavel;
+                    option.textContent = variavel;
+                    variavelSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "Nenhuma variável disponível";
+                variavelSelect.appendChild(option);
+            }
+            
+            // Atualizar o preço após carregar as variáveis
+            atualizarPreco(id);
+        })
+        .catch(error => {
+            console.error('Erro ao obter variáveis:', error);
+        });
 }
 
 // Função para atualizar o preço unitário com base nas seleções
@@ -217,6 +253,16 @@ function adicionarServico() {
     
     servicosContainer.appendChild(novoServico);
     
+    // Adicionar event listener para o novo serviço
+    const novoServicoSelect = document.getElementById(`servico-${contadorServicos}-nome`);
+    if (novoServicoSelect) {
+        novoServicoSelect.addEventListener('change', function() {
+            const servico = this.value;
+            atualizarVariaveisDisponiveis(contadorServicos, servico);
+            mostrarCamposAdicionais(contadorServicos);
+        });
+    }
+    
     // Mostrar o botão de remover serviço
     document.getElementById('removerServico').style.display = 'block';
 }
@@ -252,6 +298,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRemoverServico = document.getElementById('removerServico');
     if (btnRemoverServico) {
         btnRemoverServico.addEventListener('click', removerServico);
+    }
+
+    // Adicionar event listener para atualizar variáveis quando o serviço é alterado
+    const servicoSelect = document.getElementById('servico-1-nome');
+    if (servicoSelect) {
+        servicoSelect.addEventListener('change', function() {
+            const servico = this.value;
+            atualizarVariaveisDisponiveis(1, servico);
+            mostrarCamposAdicionais(1);
+        });
     }
 
     // Inicializar preços para o primeiro serviço
