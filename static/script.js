@@ -198,9 +198,9 @@ function adicionarServico() {
             
             <!-- Campos comuns para todos os serviços -->
             <div class="mb-3">
-                <label for="regiao-${contadorServicos}" class="form-label">Região/Instituto:</label>
+                <label for="regiao-${contadorServicos}" class="form-label">Região:</label>
                 <select class="form-select regiao-select" id="regiao-${contadorServicos}" name="servicos[${contadorServicos-1}][regiao]" required onchange="atualizarPreco(${contadorServicos})">
-                    <option value="">Selecione a região ou Instituto</option>
+                    <option value="">Selecione a região</option>
                     <option value="Instituto">Instituto</option>
                     <option value="Central">Central</option>
                     <option value="Norte">Norte</option>
