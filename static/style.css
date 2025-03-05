@@ -517,3 +517,61 @@ body.dark-mode .preco-unitario, body.dark-mode .preco-total {
     color: #ffffff; /* Texto branco para contraste com o fundo escuro */
     font-size: 2rem;
 }
+
+/* Estilos específicos para os botões de Grau de Risco */
+#grauRisco1e2-1 + .btn-radio, 
+[id^="grauRisco1e2-"] + .btn-radio {
+    background-color: #d1fae5; /* Fundo verde claro para Grau 1 e 2 */
+    color: #065f46; /* Texto verde escuro */
+    border-color: #a7f3d0; /* Borda verde clara */
+}
+
+#grauRisco1e2-1:checked + .btn-radio, 
+[id^="grauRisco1e2-"]:checked + .btn-radio {
+    background-color: #10b981; /* Verde mais forte quando selecionado */
+    color: #ffffff; /* Texto branco para contraste */
+    border-color: #059669; /* Borda verde escura */
+}
+
+#grauRisco3e4-1 + .btn-radio, 
+[id^="grauRisco3e4-"] + .btn-radio {
+    background-color: #fee2e2; /* Fundo vermelho claro para Grau 3 e 4 */
+    color: #b91c1c; /* Texto vermelho escuro */
+    border-color: #fecaca; /* Borda vermelha clara */
+}
+
+#grauRisco3e4-1:checked + .btn-radio, 
+[id^="grauRisco3e4-"]:checked + .btn-radio {
+    background-color: #ef4444; /* Vermelho mais forte quando selecionado */
+    color: #ffffff; /* Texto branco para contraste */
+    border-color: #dc2626; /* Borda vermelha escura */
+}
+
+/* Modo escuro para os botões de Grau de Risco */
+body.dark-mode #grauRisco1e2-1 + .btn-radio, 
+body.dark-mode [id^="grauRisco1e2-"] + .btn-radio {
+    background-color: #064e3b; /* Verde escuro para modo escuro */
+    color: #a7f3d0; /* Texto verde claro */
+    border-color: #065f46; /* Borda verde média */
+}
+
+body.dark-mode #grauRisco1e2-1:checked + .btn-radio, 
+body.dark-mode [id^="grauRisco1e2-"]:checked + .btn-radio {
+    background-color: #059669; /* Verde médio quando selecionado no modo escuro */
+    color: #ecfdf5; /* Texto verde muito claro */
+    border-color: #10b981; /* Borda verde clara */
+}
+
+body.dark-mode #grauRisco3e4-1 + .btn-radio, 
+body.dark-mode [id^="grauRisco3e4-"] + .btn-radio {
+    background-color: #7f1d1d; /* Vermelho escuro para modo escuro */
+    color: #fecaca; /* Texto vermelho claro */
+    border-color: #991b1b; /* Borda vermelha média */
+}
+
+body.dark-mode #grauRisco3e4-1:checked + .btn-radio, 
+body.dark-mode [id^="grauRisco3e4-"]:checked + .btn-radio {
+    background-color: #b91c1c; /* Vermelho médio quando selecionado no modo escuro */
+    color: #fee2e2; /* Texto vermelho muito claro */
+    border-color: #ef4444; /* Borda vermelha clara */
+}
