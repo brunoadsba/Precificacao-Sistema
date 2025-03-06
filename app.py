@@ -301,9 +301,16 @@ def resumo():
     
     cliente_email = session.get('cliente_email', '')
     empresa_cliente = session.get('empresa_cliente', '')
+    telefone_cliente = session.get('telefone_cliente', '')
     servicos = session.get('servicos', [])
     
-    return render_template('resumo.html', email=cliente_email, empresa_cliente=empresa_cliente, servicos=servicos)
+    return render_template(
+        'resumo.html',
+        email=cliente_email,
+        empresa_cliente=empresa_cliente,
+        telefone=telefone_cliente,
+        servicos=servicos
+    )
 
 @app.route('/gerar_orcamento', methods=['POST'])
 def gerar_orcamento():
@@ -391,8 +398,9 @@ def index():
 def processar_formulario():
     """Processa o formulário de orçamento"""
     if request.method == 'POST':
-        cliente_email = request.form.get('cliente_email', '')
-        empresa_cliente = request.form.get('empresa', '')
+        cliente_email = request.form.get('cliente_email')
+        empresa_cliente = request.form.get('empresa')
+        telefone_cliente = request.form.get('telefone', '')
         
         servicos_form = []
         total_orcamento = 0
@@ -443,6 +451,7 @@ def processar_formulario():
         
         session['cliente_email'] = cliente_email
         session['empresa_cliente'] = empresa_cliente
+        session['telefone_cliente'] = telefone_cliente
         session['servicos'] = servicos_form
         session['total_orcamento'] = total_orcamento
         session['data_orcamento'] = datetime.now().strftime('%d/%m/%Y')

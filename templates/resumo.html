@@ -125,8 +125,9 @@
         
         {% if email %}
         <div class="client-info">
-            <p><strong>E-mail para contato:</strong> {{ email }}</p>
-            <p><strong>Nome da Empresa:</strong> {{ empresa_cliente if empresa_cliente else 'Não informado' }}</p>
+            <p><strong>Empresa:</strong> {{ empresa_cliente if empresa_cliente else 'Não informado' }}</p>
+            <p><strong>E-mail:</strong> {{ email }}</p>
+            <p><strong>Telefone:</strong> {{ telefone if telefone else 'Não informado' }}</p>
         </div>
         {% endif %}
         
