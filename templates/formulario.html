@@ -165,3 +165,17 @@
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    // Formatar os valores iniciais quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Formatar o preço unitário e total do primeiro serviço
+        document.getElementById('precoUnitario-1').textContent = formatarMoeda(0);
+        document.getElementById('precoTotal-1').textContent = formatarMoeda(0);
+        
+        // Formatar o total do orçamento
+        document.getElementById('totalOrcamento').textContent = formatarMoeda(0);
+    });
+</script>
+{% endblock %}

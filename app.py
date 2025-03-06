@@ -15,225 +15,151 @@ load_dotenv()
 
 # Função para verificar a estrutura da planilha
 def verificar_planilha():
-    """
-    Verifica a estrutura da planilha Excel e imprime informações úteis para debug
-    """
-    try:
-        df_pgr, df_outros = carregar_dados_excel()
-        print(f"Caminho da planilha: {EXCEL_PATH}")
-        print("Aba PGR (tabela_1) - Colunas:", df_pgr.columns.tolist())
-        print("Aba Outros Serviços (tabela_5) - Colunas:", df_outros.columns.tolist())
-        print("Aba PGR (tabela_1) - Número de linhas:", len(df_pgr))
-        print("Aba Outros Serviços (tabela_5) - Número de linhas:", len(df_outros))
-        print("Primeiras linhas da Aba PGR (tabela_1):")
-        print(df_pgr.head())
-        print("Primeiras linhas da Aba Outros Serviços (tabela_5):")
-        print(df_outros.head())
-        return True
-    except Exception as e:
-        print(f"Erro ao verificar planilha: {e}")
-        return False
+    """Verifica se os arquivos CSV existem"""
+    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
+    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+    
+    if not os.path.exists(pgr_path):
+        return False, f"Arquivo não encontrado: {pgr_path}"
+    
+    if not os.path.exists(ambientais_path):
+        return False, f"Arquivo não encontrado: {ambientais_path}"
+    
+    return True, "Arquivos CSV encontrados"
 
 def obter_servicos():
-    """
-    Obtém a lista de serviços disponíveis
+    """Obtém a lista de serviços disponíveis a partir dos arquivos CSV"""
+    servicos = set()
     
-    Returns:
-        list: Lista de nomes de serviços
-    """
-    servicos = [
-        "Elaboração e acompanhamento do PGR",
-        "Coleta para Avaliação Ambiental",
-        "Ruído Limítrofe (NBR 10151)",
-        "Relatório Técnico por Agente Ambiental",
-        "Revisão de Relatório Técnico (após 90 dias)",
-        "Laudo de Insalubridade",
-        "Revisão de Laudo de Insalubridade (após 90 dias)",
-        "LTCAT - Condições Ambientais de Trabalho",
-        "Revisão de LTCAT (após 90 dias)",
-        "Laudo de Periculosidade",
-        "Revisão de Laudo de Periculosidade (após 90 dias)"
-    ]
-    print(f"Serviços disponíveis: {servicos}")
-    return servicos
+    # Carregar serviços do arquivo PGR
+    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
+    if os.path.exists(pgr_path):
+        try:
+            df_pgr = pd.read_csv(pgr_path)
+            servicos.update(df_pgr['Serviço'].unique())
+        except Exception as e:
+            app.logger.error(f"Erro ao ler arquivo PGR: {str(e)}")
+    
+    # Carregar serviços do arquivo Ambientais
+    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+    if os.path.exists(ambientais_path):
+        try:
+            df_ambientais = pd.read_csv(ambientais_path)
+            servicos.update(df_ambientais['Serviço'].unique())
+        except Exception as e:
+            app.logger.error(f"Erro ao ler arquivo Ambientais: {str(e)}")
+    
+    return sorted(list(servicos))
 
 def carregar_dados_excel():
-    """Carrega os dados das tabelas de precificação do arquivo Excel"""
-    try:
-        # Carrega as duas abas corretas do Excel: 'tabela_1' para PGR e 'tabela_5' para outros serviços
-        df_pgr = pd.read_excel(EXCEL_PATH, sheet_name='tabela_1')
-        df_outros = pd.read_excel(EXCEL_PATH, sheet_name='tabela_5')
-        # Remove linhas completamente vazias
-        df_pgr = df_pgr.dropna(how='all')
-        df_outros = df_outros.dropna(how='all')
-        return df_pgr, df_outros
-    except Exception as e:
-        print(f"Erro ao carregar o arquivo Excel: {e}")
-        return None, None
+    """Carrega os dados dos arquivos CSV"""
+    dados = {}
+    
+    # Carregar dados do arquivo PGR
+    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
+    if os.path.exists(pgr_path):
+        try:
+            df_pgr = pd.read_csv(pgr_path)
+            dados['pgr'] = df_pgr
+        except Exception as e:
+            app.logger.error(f"Erro ao ler arquivo PGR: {str(e)}")
+    
+    # Carregar dados do arquivo Ambientais
+    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+    if os.path.exists(ambientais_path):
+        try:
+            df_ambientais = pd.read_csv(ambientais_path)
+            dados['ambientais'] = df_ambientais
+        except Exception as e:
+            app.logger.error(f"Erro ao ler arquivo Ambientais: {str(e)}")
+    
+    return dados
 
 def obter_preco_servico(nome_servico, quantidade=1, regiao="Central", variavel=None, grau_risco=None, num_trabalhadores=None):
-    """
-    Obtém o preço de um serviço com base nas tabelas de preços, incluindo Variável, Região/Instituto, Grau de Risco e Número de Trabalhadores
-    
-    Args:
-        nome_servico: Nome do serviço
-        quantidade: Quantidade do serviço (não usado aqui para PGR, retornamos o preço unitário)
-        regiao: Região ou "Instituto" onde o serviço será prestado
-        variavel: Tipo de variável (ex.: "Pacote (1 a 4 avaliações)", "Por Avaliação Adicional")
-        grau_risco: Grau de risco (1 e 2 ou 3 e 4) para PGR
-        num_trabalhadores: Faixa de trabalhadores para PGR (ex.: "ate19", "20a50", etc.)
-    
-    Returns:
-        float: Preço unitário do serviço
-    """
+    """Obtém o preço de um serviço com base nos parâmetros fornecidos"""
     try:
-        print(f"Buscando preço para: {nome_servico}, quantidade: {quantidade}, região: {regiao}, variável: {variavel}, grau_risco: {grau_risco}, num_trabalhadores: {num_trabalhadores}")
+        dados = carregar_dados_excel()
         
-        # Carrega os dados das duas abas
-        df_pgr, df_outros = carregar_dados_excel()
-        if df_pgr is None or df_outros is None:
-            return 0.0
-        
-        # Define o mapeamento de regiões, incluindo "Instituto" como uma opção especial
-        regioes = {
-            "Central": "Central",
-            "Norte": "Norte",
-            "Oeste": "Oeste",
-            "Sudeste": "Sudeste",
-            "Sul": "Sul",
-            "Extremo Sul": "Extremo Sul",
-            "Instituto": "Instituto"  # Nova opção para usar o valor da coluna C
-        }
-        
-        if nome_servico == "Elaboração e acompanhamento do PGR":
-            # Filtra os dados para PGR com base em Grau de Risco e Número de Trabalhadores
+        # Verificar se o serviço é PGR
+        if "PGR" in nome_servico or nome_servico == "Elaboração e acompanhamento do PGR":
             if not grau_risco or not num_trabalhadores:
-                print(f"Parâmetros ausentes para PGR: grau_risco={grau_risco}, num_trabalhadores={num_trabalhadores}")
-                return 0.0
+                return None, "Parâmetros incompletos para PGR"
             
-            # Converte num_trabalhadores para o formato correto (ex.: "ate19" -> "Até 19 Trab.")
-            num_trab_map = {
-                "ate19": "Até 19 Trab.",
-                "20a50": "20 a 50 Trab.",
-                "51a100": "51 a 100 Trab.",
-                "101a160": "101 a 160 Trab.",
-                "161a250": "161 a 250 Trab.",
-                "251a300": "251 a 300 Trab.",
-                "301a350": "301 a 350 Trab.",
-                "351a400": "351 a 400 Trab.",
-                "401a450": "401 a 450 Trab.",
-                "451a500": "451 a 500 Trab.",
-                "501a550": "501 a 550 Trab.",
-                "551a600": "551 a 600 Trab.",
-                "601a650": "601 a 650 Trab.",
-                "651a700": "651 a 700 Trab.",
-                "701a750": "701 a 750 Trab.",
-                "751a800": "751 a 800 Trab."
+            df = dados.get('pgr')
+            if df is None:
+                return None, "Dados de PGR não encontrados"
+            
+            # Filtrar por serviço, grau de risco e região
+            filtro = (df['Serviço'] == nome_servico) & (df['Grau_Risco'] == grau_risco) & (df['Região'] == regiao)
+            
+            # Filtrar por faixa de trabalhadores
+            faixa_trab_map = {
+                'ate19': 'Até 19 Trab.',
+                '20a50': '20 a 50 Trab.',
+                '51a100': '51 a 100 Trab.',
+                '101a160': '101 a 160 Trab.',
+                '161a250': '161 a 250 Trab.',
+                '251a300': '251 a 300 Trab.',
+                '301a350': '301 a 350 Trab.',
+                '351a400': '351 a 400 Trab.',
+                '401a450': '401 a 450 Trab.',
+                '451a500': '451 a 500 Trab.',
+                '501a550': '501 a 550 Trab.',
+                '551a600': '551 a 600 Trab.',
+                '601a650': '601 a 650 Trab.',
+                '651a700': '651 a 700 Trab.',
+                '701a750': '701 a 750 Trab.',
+                '751a800': '751 a 800 Trab.'
             }
             
-            # Filtra os dados da aba tabela_1 (PGR), ignorando a variável (não usada para PGR)
-            servico_data = df_pgr[(df_pgr['Grau de Risco'] == grau_risco) & (df_pgr['Variável'] == num_trab_map[num_trabalhadores])]
-            if servico_data.empty:
-                print(f"Dados não encontrados para PGR com Grau de Risco {grau_risco} e {num_trab_map[num_trabalhadores]}")
-                return 0.0
+            faixa_trab = faixa_trab_map.get(num_trabalhadores)
+            if not faixa_trab:
+                return None, f"Faixa de trabalhadores inválida: {num_trabalhadores}"
             
-            row = servico_data.iloc[0]
+            filtro = filtro & (df['Faixa_Trab'] == faixa_trab)
             
-            if regiao == "Instituto":
-                preco_base = float(str(row['Instituto']).replace('R$', '').replace('.', '').replace(',', '.')) if pd.notna(row['Instituto']) else 0.0
-            else:
-                # Ajuste para lidar com a coluna "Sul" na aba tabela_1 (PGR usa "Sul" para Sul e Extremo Sul)
-                if regiao in ["Sul", "Extremo Sul"]:
-                    preco_regiao = float(str(row['Sul']).replace('R$', '').replace('.', '').replace(',', '.')) if pd.notna(row['Sul']) else 0.0
-                else:
-                    preco_regiao = float(str(row[regioes[regiao]]).replace('R$', '').replace('.', '').replace(',', '.')) if pd.notna(row[regioes[regiao]]) else 0.0
-                preco_base = preco_regiao
+            resultado = df[filtro]
+            if resultado.empty:
+                return None, f"Nenhum preço encontrado para os parâmetros: {nome_servico}, {grau_risco}, {regiao}, {faixa_trab}"
             
-            # Para PGR, ignoramos a variável, pois ela não é usada
-            variavel_valor = 0.0  # PGR não usa variável no seu caso
-            
-            # Adicional por GES/GHE (coluna D não existe na aba tabela_1, então ignoramos)
-            adicional_ges_ghe = 0.0
-            
-            # Calcula o preço unitário base (sem multiplicar pela quantidade aqui)
-            preco_base += adicional_ges_ghe + variavel_valor
-            print(f"Preço unitário calculado para PGR: {preco_base}")
-            return preco_base  # Retorna apenas o preço unitário, a multiplicação será feita no front-end
+            preco = resultado['Preço'].iloc[0]
+            return preco, "Preço encontrado com sucesso"
         
+        # Verificar se é um serviço ambiental
         else:
-            # Para outros serviços, usa a aba "tabela_5"
-            servico_data = df_outros[df_outros['Serviço'] == nome_servico]
-            if servico_data.empty:
-                print(f"Serviço não encontrado nas tabelas de preços: {nome_servico}")
-                return 0.0
+            df = dados.get('ambientais')
+            if df is None:
+                return None, "Dados ambientais não encontrados"
             
-            # Filtra por variável, se fornecida
+            # Ajustar região para Sul e Extremo Sul se necessário
+            regiao_ajustada = regiao
+            if regiao in ["Sul", "Extremo Sul"]:
+                regiao_ajustada = "Sul e Extremo Sul"
+            
+            # Filtrar por serviço e região
+            filtro = (df['Serviço'] == nome_servico) & (df['Região'] == regiao_ajustada)
+            
+            # Se tiver variável, filtrar por tipo de avaliação
             if variavel:
-                servico_data = servico_data[servico_data['Variável'] == variavel]
-                if servico_data.empty:
-                    print(f"Variável não encontrada para o serviço {nome_servico}: {variavel}")
-                    return 0.0
+                filtro = filtro & (df['Tipo_Avaliacao'] == variavel)
             
-            row = servico_data.iloc[0]
+            resultado = df[filtro]
+            if resultado.empty:
+                return None, f"Nenhum preço encontrado para os parâmetros: {nome_servico}, {regiao_ajustada}, {variavel}"
             
-            if regiao == "Instituto":
-                # Ajuste para garantir que o valor seja convertido corretamente (ex.: "R$ 352.00" -> 352.0, não 35200.0)
-                preco_base = float(str(row['Instituto']).replace('R$', '').replace('.', '').replace(',', '.')) / 100 if pd.notna(row['Instituto']) else 0.0
-            else:
-                # Ajuste para lidar com a coluna "Sul e Extremo Sul" na aba tabela_5
-                if regiao in ["Sul", "Extremo Sul"]:
-                    preco_regiao = float(str(row['Sul e Extremo Sul']).replace('R$', '').replace('.', '').replace(',', '.')) / 100 if pd.notna(row['Sul e Extremo Sul']) else 0.0
-                else:
-                    preco_regiao = float(str(row[regioes[regiao]]).replace('R$', '').replace('.', '').replace(',', '.')) / 100 if pd.notna(row[regioes[regiao]]) else 0.0
-                preco_base = preco_regiao
+            preco_base = resultado['Preço'].iloc[0]
             
-            # Obtém o Adicional por GES/GHE (coluna D), tratando "-" como 0.0
-            adicional_ges_ghe = float(str(row['Adicional por GES/GHE']).replace('R$', '').replace('.', '').replace(',', '.').replace('-', '0')) / 100 if pd.notna(row['Adicional por GES/GHE']) else 0.0
+            # Verificar se há adicional por GES/GHE
+            adicional_ges_ghe = resultado['Adicional_GES_GHE'].iloc[0]
             
-            # Obtém a variável (coluna B) se fornecida
-            variavel_valor = 0.0
-            if variavel and pd.notna(row['Variável']) and variavel in str(row['Variável']):
-                variavel_valor = float(str(row['Variável']).replace('R$', '').replace('.', '').replace(',', '.')) / 100 if pd.notna(row['Variável']) else 0.0
-            
-            # Calcula o preço base somando os componentes
-            preco_base += adicional_ges_ghe + variavel_valor
-            
-            # Ajustes específicos por serviço (exceto PGR)
-            if nome_servico == "Coleta para Avaliação Ambiental":
-                if quantidade <= 4 and variavel == "Pacote (1 a 4 avaliações)":
-                    return preco_base
-                elif quantidade > 4 and variavel == "Por Avaliação Adicional":
-                    return preco_base + (quantidade - 4) * variavel_valor
-                else:
-                    return preco_base
-            
-            elif nome_servico == "Ruído Limítrofe (NBR 10151)":
-                if quantidade <= 4 and variavel == "Pacote (1 a 4 avaliações)":
-                    return preco_base
-                elif quantidade > 4 and variavel == "Por Avaliação Adicional":
-                    return preco_base + (quantidade - 4) * variavel_valor
-                else:
-                    return preco_base
-            
-            elif nome_servico in ["Relatório Técnico por Agente Ambiental", "Revisão de Relatório Técnico (após 90 dias)",
-                                 "Laudo de Insalubridade", "Revisão de Laudo de Insalubridade (após 90 dias)",
-                                 "LTCAT - Condições Ambientais de Trabalho", "Revisão de LTCAT (após 90 dias)",
-                                 "Laudo de Periculosidade", "Revisão de Laudo de Periculosidade (após 90 dias)"]:
-                if variavel in ["Por Relatório Unitário", "Por Laudo Técnico"]:
-                    return preco_base * quantidade
-                elif variavel in ["Base + Adicional por GES/GHE"]:
-                    return (preco_base + adicional_ges_ghe) * quantidade  # Inclui o adicional por quantidade
-                elif variavel in ["Adicional por GES/GHE Revisado"]:
-                    return adicional_ges_ghe * quantidade  # Apenas o adicional revisado, multiplicado pela quantidade
-                else:
-                    return preco_base * quantidade
-            
-            print(f"Serviço não encontrado nas tabelas de preços ou variável inválida: {nome_servico}, {variavel}")
-            return 0.0
-        
+            # Por enquanto, não estamos aplicando o adicional, apenas retornando o preço base
+            return preco_base, "Preço encontrado com sucesso"
+    
     except Exception as e:
-        print(f"Erro ao obter preço do serviço: {e}")
-        return 0.0
+        app.logger.error(f"Erro ao obter preço: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None, f"Erro ao obter preço: {str(e)}"
 
 # Inicialização do aplicativo Flask
 app = Flask(__name__)
@@ -295,7 +221,7 @@ def formulario():
                 grau_risco = grau_risks[i] if i < len(grau_risks) else None
                 num_trabalhador = num_trabalhadores[i] if i < len(num_trabalhadores) else None
                 
-                preco_unitario = obter_preco_servico(nome, quantidade, regiao, variavel, grau_risco, num_trabalhador)
+                preco_unitario, resultado = obter_preco_servico(nome, quantidade, regiao, variavel, grau_risco, num_trabalhador)
                 preco_total = preco_unitario * quantidade
                 
                 print(f"Serviço {i+1}: {nome}, Preço unitário: {preco_unitario}, Preço total: {preco_total}, Variável: {variavel}, Grau de Risco: {grau_risco}, Número de Trabalhadores: {num_trabalhador}")
@@ -330,23 +256,39 @@ def formulario():
             flash(f"Erro ao processar o formulário: {e}")
             return redirect(url_for('formulario'))
     
+    # Carregar dados dos arquivos CSV
+    dados = carregar_dados_excel()
+    
+    # Verificar se os dados foram carregados corretamente
+    if not dados or not isinstance(dados, dict):
+        flash("Erro ao carregar dados dos arquivos CSV", "error")
+        return render_template('formulario.html', servicos=[], variaveis_disponiveis={})
+    
+    # Obter serviços disponíveis
     servicos = obter_servicos()
-    # Carrega as variáveis disponíveis para cada serviço do Excel
-    df_pgr, df_outros = carregar_dados_excel()
+    
+    # Preparar dicionário de variáveis disponíveis para cada serviço
     variaveis_disponiveis = {}
-    if df_pgr is not None and df_outros is not None:
-        for servico in servicos:
-            if servico == "Elaboração e acompanhamento do PGR":
-                variaveis = df_pgr['Variável'].dropna().unique().tolist()
+    
+    # Para serviços PGR, não há variáveis específicas
+    for servico in servicos:
+        if "PGR" in servico:
+            variaveis_disponiveis[servico] = []
+            continue
+        
+        # Para serviços ambientais
+        df_ambientais = dados.get('ambientais')
+        if df_ambientais is not None and isinstance(df_ambientais, pd.DataFrame):
+            # Filtrar por serviço
+            filtro = df_ambientais['Serviço'] == servico
+            resultado = df_ambientais[filtro]
+            
+            if not resultado.empty:
+                # Obter valores únicos da coluna Tipo_Avaliacao
+                variaveis = resultado['Tipo_Avaliacao'].unique().tolist()
+                variaveis_disponiveis[servico] = variaveis
             else:
-                # Extrai todas as variáveis únicas para o serviço na tabela_5
-                variaveis = df_outros[df_outros['Serviço'] == servico]['Variável'].dropna().unique().tolist()
-            # Garante que as variáveis sejam exatamente as listadas
-            validas = ["Pacote (1 a 4 avaliações)", "Por Avaliação Adicional", "Por Relatório Unitário",
-                      "Base + Adicional por GES/GHE", "Adicional por GES/GHE Revisado", "Por Laudo Técnico"]
-            variaveis_filtradas = [v for v in variaveis if v in validas]
-            print(f"Variáveis disponíveis para {servico}: {variaveis_filtradas}")
-            variaveis_disponiveis[servico] = variaveis_filtradas if variaveis_filtradas else [None]
+                variaveis_disponiveis[servico] = []
     
     return render_template('formulario.html', servicos=servicos, variaveis_disponiveis=variaveis_disponiveis)
 
@@ -402,25 +344,41 @@ def confirmacao():
     return render_template('confirmacao.html')
 
 def explorar_planilha():
-    """
-    Explora a estrutura da planilha Excel e imprime informações detalhadas
-    """
+    """Função para explorar os dados dos arquivos CSV (para debug)"""
     try:
-        excel_file = pd.ExcelFile(EXCEL_PATH)
-        sheet_names = excel_file.sheet_names
-        print(f"Planilhas disponíveis: {sheet_names}")
+        pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
+        ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
         
-        for sheet_name in sheet_names:
-            print(f"\n--- Planilha: {sheet_name} ---")
-            df = pd.read_excel(EXCEL_PATH, sheet_name=sheet_name)
-            print(f"Dimensões: {df.shape[0]} linhas x {df.shape[1]} colunas")
-            print(f"Colunas: {df.columns.tolist()}")
-            print("Primeiras 5 linhas:")
-            print(df.head())
-        return True
+        resultado = {}
+        
+        # Explorar PGR
+        if os.path.exists(pgr_path):
+            df_pgr = pd.read_csv(pgr_path)
+            resultado['pgr'] = {
+                'colunas': df_pgr.columns.tolist(),
+                'servicos': df_pgr['Serviço'].unique().tolist(),
+                'graus_risco': df_pgr['Grau_Risco'].unique().tolist(),
+                'faixas_trab': df_pgr['Faixa_Trab'].unique().tolist(),
+                'regioes': df_pgr['Região'].unique().tolist(),
+                'num_registros': len(df_pgr)
+            }
+        
+        # Explorar Ambientais
+        if os.path.exists(ambientais_path):
+            df_ambientais = pd.read_csv(ambientais_path)
+            resultado['ambientais'] = {
+                'colunas': df_ambientais.columns.tolist(),
+                'servicos': df_ambientais['Serviço'].unique().tolist(),
+                'tipos_avaliacao': df_ambientais['Tipo_Avaliacao'].unique().tolist(),
+                'regioes': df_ambientais['Região'].unique().tolist(),
+                'num_registros': len(df_ambientais)
+            }
+        
+        return resultado
+    
     except Exception as e:
-        print(f"Erro ao explorar planilha: {e}")
-        return False
+        app.logger.error(f"Erro ao explorar planilha: {str(e)}")
+        return {'error': str(e)}
 
 explorar_planilha()
 
@@ -495,19 +453,28 @@ def processar_formulario():
 
 @app.route('/calcular_preco')
 def calcular_preco():
-    """Calcula o preço dinamicamente com base nos parâmetros do formulário"""
-    servico = request.args.get('servico', '')
-    regiao = request.args.get('regiao', 'Central')
-    variavel = request.args.get('variavel', '')
-    quantidade = int(request.args.get('quantidade', 1))
-    grau_risco = request.args.get('grau_risco', '')
-    num_trabalhadores = request.args.get('num_trabalhadores', '')
+    """Calcula o preço de um serviço com base nos parâmetros da requisição"""
+    servico = request.args.get('servico')
+    regiao = request.args.get('regiao')
+    variavel = request.args.get('variavel')
+    grau_risco = request.args.get('grau_risco')
+    num_trabalhadores = request.args.get('num_trabalhadores')
     
-    print(f"Parâmetros recebidos: servico={servico}, regiao={regiao}, variavel={variavel}, quantidade={quantidade}, grau_risco={grau_risco}, num_trabalhadores={num_trabalhadores}")
+    if not servico or not regiao:
+        return jsonify({'error': 'Parâmetros incompletos'}), 400
     
-    preco_unitario = obter_preco_servico(servico, quantidade, regiao, variavel, grau_risco, num_trabalhadores)
+    preco, mensagem = obter_preco_servico(
+        nome_servico=servico,
+        regiao=regiao,
+        variavel=variavel,
+        grau_risco=grau_risco,
+        num_trabalhadores=num_trabalhadores
+    )
     
-    return jsonify({"preco_unitario": preco_unitario})
+    if preco is None:
+        return jsonify({'error': mensagem}), 404
+    
+    return jsonify({'preco': preco, 'mensagem': mensagem})
 
 @app.route('/enviar_email/<int:orcamento_id>')
 def enviar_email(orcamento_id):
@@ -532,26 +499,38 @@ def enviar_email(orcamento_id):
 
 @app.route('/obter_variaveis')
 def obter_variaveis():
-    servico = request.args.get('servico', '')
+    """Obtém as variáveis disponíveis para um serviço específico"""
+    servico = request.args.get('servico')
+    if not servico:
+        return jsonify({'error': 'Serviço não especificado'}), 400
     
-    # Carregar os dados da planilha se ainda não foram carregados
-    if not hasattr(app, 'dados_excel') or app.dados_excel is None:
-        carregar_dados_excel()
+    try:
+        dados = carregar_dados_excel()
+        
+        # Se for PGR, não tem variáveis específicas
+        if "PGR" in servico:
+            return jsonify({'variaveis': []})
+        
+        # Para serviços ambientais
+        df = dados.get('ambientais')
+        if df is None:
+            return jsonify({'error': 'Dados ambientais não encontrados'}), 404
+        
+        # Filtrar por serviço
+        filtro = df['Serviço'] == servico
+        resultado = df[filtro]
+        
+        if resultado.empty:
+            return jsonify({'variaveis': []})
+        
+        # Obter valores únicos da coluna Tipo_Avaliacao
+        variaveis = resultado['Tipo_Avaliacao'].unique().tolist()
+        
+        return jsonify({'variaveis': variaveis})
     
-    variaveis = []
-    
-    # Verificar se o serviço existe na tabela_5
-    if 'tabela_5' in app.dados_excel:
-        tabela_5 = app.dados_excel['tabela_5']
-        # Filtrar as variáveis para o serviço selecionado
-        for _, row in tabela_5.iterrows():
-            if row.get('Serviço') == servico and pd.notna(row.get('Variável')):
-                variaveis.append(row.get('Variável'))
-    
-    # Remover duplicatas e ordenar
-    variaveis = sorted(list(set(variaveis)))
-    
-    return jsonify({'variaveis': variaveis})
+    except Exception as e:
+        app.logger.error(f"Erro ao obter variáveis: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # Configuração para Vercel
 if __name__ == "__main__":

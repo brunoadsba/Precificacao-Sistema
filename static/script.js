@@ -20,161 +20,222 @@ function mostrarCamposAdicionais(id) {
 
 // Adicionar nova função para atualizar as variáveis disponíveis
 function atualizarVariaveisDisponiveis(id, servico) {
-    // Fazer uma requisição para obter as variáveis disponíveis para o serviço selecionado
+    if (!servico) return;
+    
+    // Limpar o select de variáveis
+    const variavelSelect = document.getElementById(`variavel-${id}`);
+    variavelSelect.innerHTML = '<option value="">Selecione uma variável</option>';
+    
+    // Se for PGR, esconder o campo de variáveis e mostrar os campos específicos de PGR
+    if (servico.includes("PGR")) {
+        document.getElementById(`parametros-pgr-${id}`).style.display = "block";
+        variavelSelect.parentElement.style.display = "none";
+        return;
+    }
+    
+    // Para outros serviços, esconder os campos de PGR e mostrar o campo de variáveis
+    document.getElementById(`parametros-pgr-${id}`).style.display = "none";
+    variavelSelect.parentElement.style.display = "block";
+    
+    // Fazer requisição para obter as variáveis disponíveis
     fetch(`/obter_variaveis?servico=${encodeURIComponent(servico)}`)
         .then(response => response.json())
         .then(data => {
-            const variavelSelect = document.getElementById(`variavel-${id}`);
-            // Limpar opções atuais
-            variavelSelect.innerHTML = '<option value="">Selecione uma variável</option>';
-            
-            // Adicionar novas opções
-            if (data.variaveis && data.variaveis.length > 0) {
-                data.variaveis.forEach(variavel => {
-                    const option = document.createElement('option');
-                    option.value = variavel;
-                    option.textContent = variavel;
-                    variavelSelect.appendChild(option);
-                });
-            } else {
-                const option = document.createElement('option');
-                option.value = "";
-                option.textContent = "Nenhuma variável disponível";
-                variavelSelect.appendChild(option);
+            if (data.error) {
+                console.error("Erro ao obter variáveis:", data.error);
+                return;
             }
             
-            // Atualizar o preço após carregar as variáveis
-            atualizarPreco(id);
+            const variaveis = data.variaveis || [];
+            
+            // Se não houver variáveis, esconder o campo
+            if (variaveis.length === 0) {
+                variavelSelect.parentElement.style.display = "none";
+                return;
+            }
+            
+            // Adicionar as variáveis ao select
+            variaveis.forEach(variavel => {
+                const option = document.createElement('option');
+                option.value = variavel;
+                option.textContent = variavel;
+                variavelSelect.appendChild(option);
+            });
+            
+            // Mostrar o campo de variáveis
+            variavelSelect.parentElement.style.display = "block";
         })
         .catch(error => {
-            console.error('Erro ao obter variáveis:', error);
+            console.error("Erro na requisição:", error);
         });
+}
+
+// Função para formatar valores monetários no padrão brasileiro (R$ 2.502,00)
+function formatarMoeda(valor) {
+    // Converte para número caso seja string
+    const numero = typeof valor === 'string' ? parseFloat(valor.replace(',', '.')) : valor;
+    
+    // Formata o número com separador de milhar e duas casas decimais
+    return `R$ ${numero.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })}`;
 }
 
 // Função para atualizar o preço unitário com base nas seleções
 function atualizarPreco(id) {
-    const servico = document.getElementById(`servico-${id}-nome`).value;
-    const regiao = document.getElementById(`regiao-${id}`).value;
-    const variavel = document.getElementById(`variavel-${id}`).value;
-    const quantidade = parseInt(document.getElementById(`quantidade-${id}`).value) || 1;
-    let grauRisco = null, numTrabalhadores = null;
-
-    if (servico === 'Elaboração e acompanhamento do PGR') {
-        grauRisco = document.querySelector(`input[name="servicos[${id-1}][grau_risco]"]:checked`)?.value || '1 e 2';
-        numTrabalhadores = document.getElementById(`numTrabalhadores-${id}`).value;
+    const servicoSelect = document.getElementById(`servico-${id}-nome`);
+    const regiaoSelect = document.getElementById(`regiao-${id}`);
+    const variavelSelect = document.getElementById(`variavel-${id}`);
+    const precoUnitarioElement = document.getElementById(`precoUnitario-${id}`);
+    const precoUnitarioHidden = document.getElementById(`precoUnitarioHidden-${id}`);
+    
+    // Verificar se os campos obrigatórios estão preenchidos
+    if (!servicoSelect.value || !regiaoSelect.value) {
+        precoUnitarioElement.textContent = formatarMoeda(0);
+        precoUnitarioHidden.value = 0;
+        atualizarPrecoTotal(id);
+        return;
     }
-
-    if (servico && regiao) {
-        // Construir a URL corretamente, usando '&'
-        let url = `/calcular_preco?servico=${encodeURIComponent(servico)}&regiao=${encodeURIComponent(regiao)}&variavel=${encodeURIComponent(variavel || '')}&quantidade=${quantidade}`;
-        if (grauRisco) url += `&grau_risco=${encodeURIComponent(grauRisco)}`;
-        if (numTrabalhadores) url += `&num_trabalhadores=${encodeURIComponent(numTrabalhadores)}`;
-
-        console.log(`Fazendo requisição para: ${url}`);
-
-        fetch(url, {
-            method: 'GET'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na resposta do servidor');
+    
+    // Parâmetros para a requisição
+    const params = new URLSearchParams({
+        servico: servicoSelect.value,
+        regiao: regiaoSelect.value
+    });
+    
+    // Adicionar variável se estiver disponível e não for um serviço de PGR
+    if (!servicoSelect.value.includes("PGR") && !servicoSelect.value.includes("Elaboração e acompanhamento do PGR") && 
+        variavelSelect.style.display !== "none" && variavelSelect.value) {
+        params.append('variavel', variavelSelect.value);
+    }
+    
+    // Adicionar parâmetros específicos para PGR
+    if (servicoSelect.value.includes("PGR") || servicoSelect.value.includes("Elaboração e acompanhamento do PGR")) {
+        const grauRiscoElements = document.getElementsByName(`servicos[${id-1}][grau_risco]`);
+        let grauRisco = "";
+        for (const element of grauRiscoElements) {
+            if (element.checked) {
+                grauRisco = element.value;
+                break;
             }
-            return response.json();
-        })
+        }
+        
+        const numTrabalhadores = document.getElementById(`numTrabalhadores-${id}`).value;
+        
+        if (!grauRisco || !numTrabalhadores) {
+            precoUnitarioElement.textContent = formatarMoeda(0);
+            precoUnitarioHidden.value = 0;
+            atualizarPrecoTotal(id);
+            return;
+        }
+        
+        params.append('grau_risco', grauRisco);
+        params.append('num_trabalhadores', numTrabalhadores);
+    }
+    
+    // Fazer requisição para obter o preço
+    fetch(`/calcular_preco?${params.toString()}`)
+        .then(response => response.json())
         .then(data => {
-            if (data.preco_unitario && data.preco_unitario > 0) {
-                document.getElementById(`precoUnitario-${id}`).textContent = `R$ ${data.preco_unitario.toFixed(2).replace('.', ',')}`;
-                document.getElementById(`precoUnitarioHidden-${id}`).value = data.preco_unitario;
+            if (data.error) {
+                console.error("Erro ao calcular preço:", data.error);
+                precoUnitarioElement.textContent = "Erro ao calcular preço";
+                precoUnitarioHidden.value = 0;
             } else {
-                document.getElementById(`precoUnitario-${id}`).textContent = 'R$ 0,00';
-                document.getElementById(`precoUnitarioHidden-${id}`).value = 0;
+                const preco = parseFloat(data.preco);
+                precoUnitarioElement.textContent = formatarMoeda(preco);
+                precoUnitarioHidden.value = preco;
             }
             atualizarPrecoTotal(id);
         })
         .catch(error => {
-            console.error('Erro ao calcular preço:', error);
-            document.getElementById(`precoUnitario-${id}`).textContent = 'R$ 0,00';
-            document.getElementById(`precoUnitarioHidden-${id}`).value = 0;
+            console.error("Erro na requisição:", error);
+            precoUnitarioElement.textContent = "Erro na requisição";
+            precoUnitarioHidden.value = 0;
             atualizarPrecoTotal(id);
         });
-    } else {
-        document.getElementById(`precoUnitario-${id}`).textContent = 'R$ 0,00';
-        document.getElementById(`precoUnitarioHidden-${id}`).value = 0;
-        atualizarPrecoTotal(id);
-    }
 }
 
 // Função para atualizar o preço total com base na quantidade
 function atualizarPrecoTotal(id) {
-    const precoUnitarioText = document.getElementById(`precoUnitario-${id}`).textContent;
-    const precoUnitario = parseFloat(precoUnitarioText.replace('R$ ', '').replace(',', '.')) || 0;
-    const quantidade = parseInt(document.getElementById(`quantidade-${id}`).value) || 1;
+    const precoUnitarioHidden = document.getElementById(`precoUnitarioHidden-${id}`);
+    const precoTotalElement = document.getElementById(`precoTotal-${id}`);
+    const precoTotalHidden = document.getElementById(`precoTotalHidden-${id}`);
+    const quantidadeInput = document.getElementById(`quantidade-${id}`);
     
-    // Garante que o preço total seja calculado corretamente com base no preço unitário retornado
+    const precoUnitario = parseFloat(precoUnitarioHidden.value) || 0;
+    const quantidade = parseInt(quantidadeInput.value) || 1;
+    
     const precoTotal = precoUnitario * quantidade;
-    document.getElementById(`precoTotal-${id}`).textContent = `R$ ${precoTotal.toFixed(2).replace('.', ',')}`;
-    document.getElementById(`precoTotalHidden-${id}`).value = precoTotal;
     
-    // Atualizar o total do orçamento
+    precoTotalElement.textContent = formatarMoeda(precoTotal);
+    precoTotalHidden.value = precoTotal;
+    
     atualizarTotalOrcamento();
 }
 
 // Função para atualizar o total do orçamento
 function atualizarTotalOrcamento() {
-    let total = 0;
-    const precosTotais = document.querySelectorAll('.preco-total');
+    const precosTotaisHidden = document.querySelectorAll('[id^="precoTotalHidden-"]');
+    const totalOrcamentoElement = document.getElementById('totalOrcamento');
+    const totalOrcamentoHidden = document.getElementById('totalOrcamentoHidden');
     
-    precosTotais.forEach(function(elemento) {
-        const precoText = elemento.textContent;
-        const preco = parseFloat(precoText.replace('R$ ', '').replace(',', '.')) || 0;
-        total += preco;
+    let total = 0;
+    precosTotaisHidden.forEach(input => {
+        total += parseFloat(input.value) || 0;
     });
     
-    document.getElementById('totalOrcamento').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    document.getElementById('totalOrcamentoHidden').value = total;
+    totalOrcamentoElement.textContent = formatarMoeda(total);
+    totalOrcamentoHidden.value = total;
 }
 
 // Função para adicionar um novo serviço
 function adicionarServico() {
-    contadorServicos++;
-    
     const servicosContainer = document.getElementById('servicos-container');
-    const novoServico = document.createElement('div');
-    novoServico.className = 'card mb-4 servico-card';
-    novoServico.id = `servico-${contadorServicos}`;
+    const servicoCards = document.querySelectorAll('.servico-card');
+    const novoId = servicoCards.length + 1;
+    const novoIndex = servicoCards.length;
     
-    novoServico.innerHTML = `
+    // Criar novo card de serviço
+    const novoCard = document.createElement('div');
+    novoCard.className = 'card mb-4 servico-card';
+    novoCard.style.backgroundColor = '#1a202c';
+    novoCard.style.border = 'none';
+    
+    // HTML para o novo card
+    novoCard.innerHTML = `
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Serviço (${contadorServicos}):</h3>
+            <h3 class="mb-0">Serviço (${novoId}):</h3>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="background-color: #1a202c;">
             <!-- Etapa 1: Seleção do Serviço -->
             <div class="mb-3">
-                <label for="servico-${contadorServicos}-nome" class="form-label">Selecione um serviço:</label>
-                <select class="form-select servico-select" id="servico-${contadorServicos}-nome" name="servicos[${contadorServicos-1}][nome]" required onchange="mostrarCamposAdicionais(${contadorServicos}); atualizarPreco(${contadorServicos})">
+                <label for="servico-${novoId}-nome" class="form-label text-white">Selecione um serviço:</label>
+                <select class="form-select servico-select" id="servico-${novoId}-nome" name="servicos[${novoIndex}][nome]" required onchange="mostrarCamposAdicionais(${novoId}); atualizarPreco(${novoId})">
                     <option value="">Selecione um serviço</option>
-                    ${Array.from(document.getElementById('servico-1-nome').options).map(option => 
-                        `<option value="${option.value}">${option.text}</option>`
-                    ).join('')}
+                    ${Array.from(document.getElementById('servico-1-nome').options)
+                        .map(option => `<option value="${option.value}">${option.text}</option>`)
+                        .join('')}
                 </select>
             </div>
             
             <!-- Etapa 2: Parâmetros Específicos para PGR -->
-            <div id="parametros-pgr-${contadorServicos}" class="parametros-pgr" style="display: none;">
+            <div id="parametros-pgr-${novoId}" class="parametros-pgr" style="display: none;">
                 <div class="mb-3">
-                    <label class="form-label">Grau de Risco:</label>
-                    <div class="btn-group w-100" role="group">
-                        <input type="radio" class="btn-check grau-risco" name="servicos[${contadorServicos-1}][grau_risco]" id="grauRisco1e2-${contadorServicos}" value="1 e 2" checked onchange="atualizarPreco(${contadorServicos})">
-                        <label class="btn btn-outline-primary" for="grauRisco1e2-${contadorServicos}">1 e 2</label>
+                    <label class="form-label text-white">Grau de Risco:</label>
+                    <div class="radio-group">
+                        <input type="radio" class="btn-check grau-risco" name="servicos[${novoIndex}][grau_risco]" id="grauRisco1e2-${novoId}" value="1 e 2" checked onchange="atualizarPreco(${novoId})">
+                        <label class="btn btn-radio" for="grauRisco1e2-${novoId}">1 e 2</label>
                         
-                        <input type="radio" class="btn-check grau-risco" name="servicos[${contadorServicos-1}][grau_risco]" id="grauRisco3e4-${contadorServicos}" value="3 e 4" onchange="atualizarPreco(${contadorServicos})">
-                        <label class="btn btn-outline-primary" for="grauRisco3e4-${contadorServicos}">3 e 4</label>
+                        <input type="radio" class="btn-check grau-risco" name="servicos[${novoIndex}][grau_risco]" id="grauRisco3e4-${novoId}" value="3 e 4" onchange="atualizarPreco(${novoId})">
+                        <label class="btn btn-radio" for="grauRisco3e4-${novoId}">3 e 4</label>
                     </div>
                 </div>
                 
                 <div class="mb-3">
-                    <label for="numTrabalhadores-${contadorServicos}" class="form-label">Número de Trabalhadores:</label>
-                    <select class="form-select num-trabalhadores" id="numTrabalhadores-${contadorServicos}" name="servicos[${contadorServicos-1}][num_trabalhadores]" onchange="atualizarPreco(${contadorServicos})">
+                    <label for="numTrabalhadores-${novoId}" class="form-label text-white">Número de Trabalhadores:</label>
+                    <select class="form-select num-trabalhadores" id="numTrabalhadores-${novoId}" name="servicos[${novoIndex}][num_trabalhadores]" onchange="atualizarPreco(${novoId})">
                         <option value="">Selecione a faixa</option>
                         <option value="ate19">Até 19 Trabalhadores</option>
                         <option value="20a50">20 a 50 Trabalhadores</option>
@@ -198,8 +259,8 @@ function adicionarServico() {
             
             <!-- Campos comuns para todos os serviços -->
             <div class="mb-3">
-                <label for="regiao-${contadorServicos}" class="form-label">Região:</label>
-                <select class="form-select regiao-select" id="regiao-${contadorServicos}" name="servicos[${contadorServicos-1}][regiao]" required onchange="atualizarPreco(${contadorServicos})">
+                <label for="regiao-${novoId}" class="form-label text-white">Região:</label>
+                <select class="form-select regiao-select" id="regiao-${novoId}" name="servicos[${novoIndex}][regiao]" required onchange="atualizarPreco(${novoId})">
                     <option value="">Selecione a região</option>
                     <option value="Instituto">Instituto</option>
                     <option value="Central">Central</option>
@@ -213,18 +274,15 @@ function adicionarServico() {
 
             <!-- Novo campo para Variável -->
             <div class="mb-3">
-                <label for="variavel-${contadorServicos}" class="form-label">Selecione a Variável:</label>
-                <select class="form-select variavel-select" id="variavel-${contadorServicos}" name="servicos[${contadorServicos-1}][variavel]" onchange="atualizarPreco(${contadorServicos})">
+                <label for="variavel-${novoId}" class="form-label text-white">Selecione a Variável:</label>
+                <select class="form-select variavel-select" id="variavel-${novoId}" name="servicos[${novoIndex}][variavel]" onchange="atualizarPreco(${novoId})">
                     <option value="">Selecione uma variável</option>
-                    {% for variavel in ['Pacote (1 a 4 avaliações)', 'Por Avaliação Adicional', 'Por Relatório Unitário', 'Base + Adicional por GES/GHE', 'Adicional por GES/GHE Revisado', 'Por Laudo Técnico'] %}
-                        <option value="{{ variavel }}">{{ variavel }}</option>
-                    {% endfor %}
                 </select>
             </div>
 
             <div class="mb-3">
-                <label for="quantidade-${contadorServicos}" class="form-label">Quantidade:</label>
-                <input type="number" class="form-control quantidade-input" id="quantidade-${contadorServicos}" name="servicos[${contadorServicos-1}][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(${contadorServicos})">
+                <label for="quantidade-${novoId}" class="form-label text-white">Quantidade:</label>
+                <input type="number" class="form-control quantidade-input" id="quantidade-${novoId}" name="servicos[${novoIndex}][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(${novoId})">
             </div>
             
             <!-- Etapa 3: Visualização do Preço -->
@@ -233,8 +291,8 @@ function adicionarServico() {
                     <div class="card bg-light">
                         <div class="card-body">
                             <h5 class="card-title">Preço Unitário:</h5>
-                            <h4 class="card-text preco-unitario" id="precoUnitario-${contadorServicos}">R$ 0,00</h4>
-                            <input type="hidden" id="precoUnitarioHidden-${contadorServicos}" name="servicos[${contadorServicos-1}][preco_unitario]" value="0">
+                            <h4 class="card-text preco-unitario" id="precoUnitario-${novoId}">${formatarMoeda(0)}</h4>
+                            <input type="hidden" id="precoUnitarioHidden-${novoId}" name="servicos[${novoIndex}][preco_unitario]" value="0">
                         </div>
                     </div>
                 </div>
@@ -242,8 +300,8 @@ function adicionarServico() {
                     <div class="card bg-light">
                         <div class="card-body">
                             <h5 class="card-title">Preço Total:</h5>
-                            <h4 class="card-text preco-total" id="precoTotal-${contadorServicos}">R$ 0,00</h4>
-                            <input type="hidden" id="precoTotalHidden-${contadorServicos}" name="servicos[${contadorServicos-1}][preco_total]" value="0">
+                            <h4 class="card-text preco-total" id="precoTotal-${novoId}">${formatarMoeda(0)}</h4>
+                            <input type="hidden" id="precoTotalHidden-${novoId}" name="servicos[${novoIndex}][preco_total]" value="0">
                         </div>
                     </div>
                 </div>
@@ -251,17 +309,8 @@ function adicionarServico() {
         </div>
     `;
     
-    servicosContainer.appendChild(novoServico);
-    
-    // Adicionar event listener para o novo serviço
-    const novoServicoSelect = document.getElementById(`servico-${contadorServicos}-nome`);
-    if (novoServicoSelect) {
-        novoServicoSelect.addEventListener('change', function() {
-            const servico = this.value;
-            atualizarVariaveisDisponiveis(contadorServicos, servico);
-            mostrarCamposAdicionais(contadorServicos);
-        });
-    }
+    // Adicionar o novo card ao container
+    servicosContainer.appendChild(novoCard);
     
     // Mostrar o botão de remover serviço
     document.getElementById('removerServico').style.display = 'block';
