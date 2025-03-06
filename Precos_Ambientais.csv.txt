@@ -1,0 +1,73 @@
+Serviço,Tipo_Avaliacao,Adicional_GES_GHE,Região,Preço
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Instituto",352.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Central",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Norte",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Oeste",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Sudoeste",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Sul e Extremo Sul",300.00
+"Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Instituto",88.00
+"Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Central",75.00
+"Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Norte",70.00
+"Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Oeste",70.00
+"Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Sudoeste",70.00
+"Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Sul e Extremo Sul",70.00
+"Ruído Limítrofe (NBR 10151)","Pacote (1 a 4 avaliações)",0.00,"Instituto",300.00
+"Ruído Limítrofe (NBR 10151)","Pacote (1 a 4 avaliações)",0.00,"Central",200.00
+"Ruído Limítrofe (NBR 10151)","Pacote (1 a 4 avaliações)",0.00,"Norte",200.00
+"Ruído Limítrofe (NBR 10151)","Pacote (1 a 4 avaliações)",0.00,"Oeste",200.00
+"Ruído Limítrofe (NBR 10151)","Pacote (1 a 4 avaliações)",0.00,"Sudoeste",200.00
+"Ruído Limítrofe (NBR 10151)","Pacote (1 a 4 avaliações)",0.00,"Sul e Extremo Sul",200.00
+"Ruído Limítrofe (NBR 10151)","Por Avaliação Adicional",0.00,"Instituto",70.00
+"Ruído Limítrofe (NBR 10151)","Por Avaliação Adicional",0.00,"Central",50.00
+"Ruído Limítrofe (NBR 10151)","Por Avaliação Adicional",0.00,"Norte",50.00
+"Ruído Limítrofe (NBR 10151)","Por Avaliação Adicional",0.00,"Oeste",50.00
+"Ruído Limítrofe (NBR 10151)","Por Avaliação Adicional",0.00,"Sudoeste",50.00
+"Ruído Limítrofe (NBR 10151)","Por Avaliação Adicional",0.00,"Sul e Extremo Sul",50.00
+"Relatório Técnico por Agente Ambiental","Por Relatório Unitário",0.00,"Instituto",1000.00
+"Relatório Técnico por Agente Ambiental","Por Relatório Unitário",0.00,"Central",800.00
+"Relatório Técnico por Agente Ambiental","Por Relatório Unitário",0.00,"Norte",800.00
+"Relatório Técnico por Agente Ambiental","Por Relatório Unitário",0.00,"Oeste",600.00
+"Relatório Técnico por Agente Ambiental","Por Relatório Unitário",0.00,"Sudoeste",600.00
+"Relatório Técnico por Agente Ambiental","Por Relatório Unitário",0.00,"Sul e Extremo Sul",600.00
+"Revisão de Relatório Técnico (após 90 dias)","Por Relatório Unitário",0.00,"Instituto",350.00
+"Revisão de Relatório Técnico (após 90 dias)","Por Relatório Unitário",0.00,"Central",160.00
+"Revisão de Relatório Técnico (após 90 dias)","Por Relatório Unitário",0.00,"Norte",120.00
+"Revisão de Relatório Técnico (após 90 dias)","Por Relatório Unitário",0.00,"Oeste",120.00
+"Revisão de Relatório Técnico (após 90 dias)","Por Relatório Unitário",0.00,"Sudoeste",120.00
+"Revisão de Relatório Técnico (após 90 dias)","Por Relatório Unitário",0.00,"Sul e Extremo Sul",120.00
+"Laudo de Insalubridade","Instituto + Adicional por GES/GHE",50.00,"Instituto",850.00
+"Laudo de Insalubridade","Instituto + Adicional por GES/GHE",50.00,"Central",800.00
+"Laudo de Insalubridade","Instituto + Adicional por GES/GHE",50.00,"Norte",500.00
+"Laudo de Insalubridade","Instituto + Adicional por GES/GHE",50.00,"Oeste",500.00
+"Laudo de Insalubridade","Instituto + Adicional por GES/GHE",50.00,"Sudoeste",500.00
+"Laudo de Insalubridade","Instituto + Adicional por GES/GHE",50.00,"Sul e Extremo Sul",500.00
+"Revisão de Laudo de Insalubridade (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Instituto",200.00
+"Revisão de Laudo de Insalubridade (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Central",160.00
+"Revisão de Laudo de Insalubridade (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Norte",100.00
+"Revisão de Laudo de Insalubridade (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Oeste",100.00
+"Revisão de Laudo de Insalubridade (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Sudoeste",100.00
+"Revisão de Laudo de Insalubridade (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Sul e Extremo Sul",100.00
+"LTCAT - Condições Ambientais de Trabalho","Instituto + Adicional por GES/GHE",50.00,"Instituto",850.00
+"LTCAT - Condições Ambientais de Trabalho","Instituto + Adicional por GES/GHE",50.00,"Central",800.00
+"LTCAT - Condições Ambientais de Trabalho","Instituto + Adicional por GES/GHE",50.00,"Norte",500.00
+"LTCAT - Condições Ambientais de Trabalho","Instituto + Adicional por GES/GHE",50.00,"Oeste",500.00
+"LTCAT - Condições Ambientais de Trabalho","Instituto + Adicional por GES/GHE",50.00,"Sudoeste",500.00
+"LTCAT - Condições Ambientais de Trabalho","Instituto + Adicional por GES/GHE",50.00,"Sul e Extremo Sul",500.00
+"Revisão de LTCAT (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Instituto",200.00
+"Revisão de LTCAT (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Central",160.00
+"Revisão de LTCAT (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Norte",100.00
+"Revisão de LTCAT (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Oeste",100.00
+"Revisão de LTCAT (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Sudoeste",100.00
+"Revisão de LTCAT (após 90 dias)","Adicional por GES/GHE Revisado",50.00,"Sul e Extremo Sul",100.00
+"Laudo de Periculosidade","Por Laudo Técnico",0.00,"Instituto",1400.00
+"Laudo de Periculosidade","Por Laudo Técnico",0.00,"Central",1000.00
+"Laudo de Periculosidade","Por Laudo Técnico",0.00,"Norte",900.00
+"Laudo de Periculosidade","Por Laudo Técnico",0.00,"Oeste",800.00
+"Laudo de Periculosidade","Por Laudo Técnico",0.00,"Sudoeste",700.00
+"Laudo de Periculosidade","Por Laudo Técnico",0.00,"Sul e Extremo Sul",700.00
+"Revisão de Laudo de Periculosidade (após 90 dias)","Por Laudo Técnico",0.00,"Instituto",280.00
+"Revisão de Laudo de Periculosidade (após 90 dias)","Por Laudo Técnico",0.00,"Central",200.00
+"Revisão de Laudo de Periculosidade (após 90 dias)","Por Laudo Técnico",0.00,"Norte",180.00
+"Revisão de Laudo de Periculosidade (após 90 dias)","Por Laudo Técnico",0.00,"Oeste",160.00
+"Revisão de Laudo de Periculosidade (após 90 dias)","Por Laudo Técnico",0.00,"Sudoeste",140.00
+"Revisão de Laudo de Periculosidade (após 90 dias)","Por Laudo Técnico",0.00,"Sul e Extremo Sul",140.00

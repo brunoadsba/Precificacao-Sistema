@@ -1,0 +1,141 @@
+Serviço,Grau_Risco,Faixa_Trab,Região,Preço
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Instituto",1180.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Central",700.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Norte",600.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Oeste",1180.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Sudoeste",550.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Sul",640.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Extremo Sul",631.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Instituto",1450.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Central",850.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Norte",675.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Oeste",1450.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Sudoeste",700.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Sul",775.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Extremo Sul",671.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Instituto",1900.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Central",1100.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Norte",750.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Oeste",1900.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Sudoeste",960.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Sul",1000.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Extremo Sul",719.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Instituto",2800.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Central",2000.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Norte",850.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Oeste",2080.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Sudoeste",1200.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Sul",1090.00
+"Elaboração e acompanhamento do PGR","1 e 2","Acima de 101 Trab.","Extremo Sul",799.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Instituto",1800.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Central",1000.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Norte",712.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Oeste",1900.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Sudoeste",1010.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Sul",800.00
+"Elaboração e acompanhamento do PGR","1 e 2","Até 19 Trab.","Extremo Sul",682.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Instituto",2260.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Central",1300.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Norte",750.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Oeste",2260.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Sudoeste",1010.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Sul",940.00
+"Elaboração e acompanhamento do PGR","1 e 2","20 a 50 Trab.","Extremo Sul",861.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Instituto",2980.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Central",1700.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Norte",824.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Oeste",2980.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Sudoeste",1170.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Sul",1220.00
+"Elaboração e acompanhamento do PGR","1 e 2","51 a 100 Trab.","Extremo Sul",996.00
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Instituto",3205.00
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Central",1900.00
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Norte",900.00
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Oeste",3205.00
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Sudoeste",1330.00
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Sul",1307.50
+"Elaboração e acompanhamento do PGR","1 e 2","101 a 160 Trab.","Extremo Sul",1066.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Instituto",3430.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Central",2100.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Norte",974.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Oeste",3430.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Sudoeste",1440.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Sul",1395.00
+"Elaboração e acompanhamento do PGR","1 e 2","161 a 250 Trab.","Extremo Sul",1151.00
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Instituto",3655.00
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Central",2300.00
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Norte",1050.00
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Oeste",3655.00
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Sudoeste",1490.00
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Sul",1482.50
+"Elaboração e acompanhamento do PGR","1 e 2","251 a 300 Trab.","Extremo Sul",1194.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Instituto",3880.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Central",2500.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Norte",1050.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Oeste",3880.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Sudoeste",1490.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Sul",1570.00
+"Elaboração e acompanhamento do PGR","3 e 4","301 a 350 Trab.","Extremo Sul",1322.00
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Instituto",4105.00
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Central",2550.00
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Norte",1124.00
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Oeste",4105.00
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Sudoeste",1650.00
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Sul",1657.50
+"Elaboração e acompanhamento do PGR","3 e 4","351 a 400 Trab.","Extremo Sul",1322.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Instituto",4510.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Central",2550.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Norte",1124.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Oeste",4510.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Sudoeste",1650.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Sul",1815.00
+"Elaboração e acompanhamento do PGR","3 e 4","401 a 450 Trab.","Extremo Sul",1487.00
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Instituto",4735.00
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Central",2675.00
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Norte",1310.00
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Oeste",4735.00
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Sudoeste",1780.00
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Sul",1902.50
+"Elaboração e acompanhamento do PGR","3 e 4","451 a 500 Trab.","Extremo Sul",1602.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Instituto",5000.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Central",3000.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Norte",1310.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Oeste",5500.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Sudoeste",1780.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Sul",2200.00
+"Elaboração e acompanhamento do PGR","3 e 4","501 a 550 Trab.","Extremo Sul",1602.00
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Instituto",5725.00
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Central",3225.00
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Norte",1386.00
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Oeste",5725.00
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Sudoeste",1990.00
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Sul",2287.50
+"Elaboração e acompanhamento do PGR","3 e 4","551 a 600 Trab.","Extremo Sul",1794.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Instituto",5950.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Central",3350.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Norte",1386.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Oeste",5950.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Sudoeste",2200.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Sul",2375.00
+"Elaboração e acompanhamento do PGR","3 e 4","601 a 650 Trab.","Extremo Sul",1960.00
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Instituto",6085.00
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Central",3425.00
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Norte",1460.00
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Oeste",6085.00
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Sudoeste",2420.00
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Sul",2427.50
+"Elaboração e acompanhamento do PGR","3 e 4","651 a 700 Trab.","Extremo Sul",2130.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Instituto",6220.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Central",3500.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Norte",1500.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Oeste",6220.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Sudoeste",2650.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Sul",2530.00
+"Elaboração e acompanhamento do PGR","3 e 4","701 a 750 Trab.","Extremo Sul",2370.00
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Instituto",6355.00
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Central",3575.00
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Norte",1575.00
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Oeste",6355.00
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Sudoeste",2840.00
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Sul",2532.50
+"Elaboração e acompanhamento do PGR","3 e 4","751 a 800 Trab.","Extremo Sul",2562.00
