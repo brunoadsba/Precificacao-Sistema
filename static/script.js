@@ -192,162 +192,247 @@ function atualizarTotalOrcamento() {
 
 // Função para adicionar um novo serviço
 function adicionarServico() {
-    const servicosContainer = document.getElementById('servicos-container');
-    const servicoCards = document.querySelectorAll('.servico-card');
-    const novoId = servicoCards.length + 1;
-    const novoIndex = servicoCards.length;
-    
-    // Criar novo card de serviço
-    const novoCard = document.createElement('div');
-    novoCard.className = 'card mb-4 servico-card';
-    novoCard.style.backgroundColor = '#1a202c';
-    novoCard.style.border = 'none';
-    
-    // HTML para o novo card
-    novoCard.innerHTML = `
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Serviço (${novoId}):</h3>
-        </div>
-        <div class="card-body" style="background-color: #1a202c;">
-            <!-- Etapa 1: Seleção do Serviço -->
-            <div class="mb-3">
-                <label for="servico-${novoId}-nome" class="form-label text-white">Selecione um serviço:</label>
-                <select class="form-select servico-select" id="servico-${novoId}-nome" name="servicos[${novoIndex}][nome]" required onchange="mostrarCamposAdicionais(${novoId}); atualizarPreco(${novoId})">
-                    <option value="">Selecione um serviço</option>
-                    ${Array.from(document.getElementById('servico-1-nome').options)
-                        .map(option => `<option value="${option.value}">${option.text}</option>`)
-                        .join('')}
-                </select>
+    try {
+        console.log("Função adicionarServico() iniciada");
+        
+        const servicosContainer = document.getElementById('servicos-container');
+        if (!servicosContainer) {
+            console.error("Container de serviços não encontrado");
+            return;
+        }
+        
+        const servicoCards = document.querySelectorAll('.servico-card');
+        const novoId = servicoCards.length + 1;
+        const novoIndex = servicoCards.length;
+        
+        console.log(`Adicionando novo serviço com ID: ${novoId}, index: ${novoIndex}`);
+        
+        // Criar novo card de serviço
+        const novoCard = document.createElement('div');
+        novoCard.className = 'card mb-4 servico-card';
+        novoCard.style.backgroundColor = '#1a202c';
+        novoCard.style.border = 'none';
+        
+        // HTML para o novo card
+        novoCard.innerHTML = `
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Serviço (${novoId}):</h3>
             </div>
-            
-            <!-- Etapa 2: Parâmetros Específicos para PGR -->
-            <div id="parametros-pgr-${novoId}" class="parametros-pgr" style="display: none;">
+            <div class="card-body" style="background-color: #1a202c;">
+                <!-- Etapa 1: Seleção do Serviço -->
                 <div class="mb-3">
-                    <label class="form-label text-white">Grau de Risco:</label>
-                    <div class="radio-group">
-                        <input type="radio" class="btn-check grau-risco" name="servicos[${novoIndex}][grau_risco]" id="grauRisco1e2-${novoId}" value="1 e 2" checked onchange="atualizarPreco(${novoId})">
-                        <label class="btn btn-radio" for="grauRisco1e2-${novoId}">1 e 2</label>
-                        
-                        <input type="radio" class="btn-check grau-risco" name="servicos[${novoIndex}][grau_risco]" id="grauRisco3e4-${novoId}" value="3 e 4" onchange="atualizarPreco(${novoId})">
-                        <label class="btn btn-radio" for="grauRisco3e4-${novoId}">3 e 4</label>
+                    <label for="servico-${novoId}-nome" class="form-label text-white">Selecione um serviço:</label>
+                    <select class="form-select servico-select" id="servico-${novoId}-nome" name="servicos[${novoIndex}][nome]" required onchange="mostrarCamposAdicionais(${novoId}); atualizarPreco(${novoId})">
+                        <option value="">Selecione um serviço</option>
+                        ${Array.from(document.getElementById('servico-1-nome').options)
+                            .map(option => `<option value="${option.value}">${option.text}</option>`)
+                            .join('')}
+                    </select>
+                </div>
+                
+                <!-- Etapa 2: Parâmetros Específicos para PGR -->
+                <div id="parametros-pgr-${novoId}" class="parametros-pgr" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label text-white">Grau de Risco:</label>
+                        <div class="radio-group">
+                            <input type="radio" class="btn-check grau-risco" name="servicos[${novoIndex}][grau_risco]" id="grauRisco1e2-${novoId}" value="1 e 2" checked onchange="atualizarPreco(${novoId})">
+                            <label class="btn btn-radio" for="grauRisco1e2-${novoId}">1 e 2</label>
+                            
+                            <input type="radio" class="btn-check grau-risco" name="servicos[${novoIndex}][grau_risco]" id="grauRisco3e4-${novoId}" value="3 e 4" onchange="atualizarPreco(${novoId})">
+                            <label class="btn btn-radio" for="grauRisco3e4-${novoId}">3 e 4</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="numTrabalhadores-${novoId}" class="form-label text-white">Número de Trabalhadores:</label>
+                        <select class="form-select num-trabalhadores" id="numTrabalhadores-${novoId}" name="servicos[${novoIndex}][num_trabalhadores]" onchange="atualizarPreco(${novoId})">
+                            <option value="">Selecione a faixa</option>
+                            <option value="ate19">Até 19 Trabalhadores</option>
+                            <option value="20a50">20 a 50 Trabalhadores</option>
+                            <option value="51a100">51 a 100 Trabalhadores</option>
+                            <option value="101a160">101 a 160 Trabalhadores</option>
+                            <option value="161a250">161 a 250 Trabalhadores</option>
+                            <option value="251a300">251 a 300 Trabalhadores</option>
+                            <option value="301a350">301 a 350 Trabalhadores</option>
+                            <option value="351a400">351 a 400 Trabalhadores</option>
+                            <option value="401a450">401 a 450 Trabalhadores</option>
+                            <option value="451a500">451 a 500 Trabalhadores</option>
+                            <option value="501a550">501 a 550 Trabalhadores</option>
+                            <option value="551a600">551 a 600 Trabalhadores</option>
+                            <option value="601a650">601 a 650 Trabalhadores</option>
+                            <option value="651a700">651 a 700 Trabalhadores</option>
+                            <option value="701a750">701 a 750 Trabalhadores</option>
+                            <option value="751a800">751 a 800 Trabalhadores</option>
+                        </select>
                     </div>
                 </div>
                 
+                <!-- Campos comuns para todos os serviços -->
                 <div class="mb-3">
-                    <label for="numTrabalhadores-${novoId}" class="form-label text-white">Número de Trabalhadores:</label>
-                    <select class="form-select num-trabalhadores" id="numTrabalhadores-${novoId}" name="servicos[${novoIndex}][num_trabalhadores]" onchange="atualizarPreco(${novoId})">
-                        <option value="">Selecione a faixa</option>
-                        <option value="ate19">Até 19 Trabalhadores</option>
-                        <option value="20a50">20 a 50 Trabalhadores</option>
-                        <option value="51a100">51 a 100 Trabalhadores</option>
-                        <option value="101a160">101 a 160 Trabalhadores</option>
-                        <option value="161a250">161 a 250 Trabalhadores</option>
-                        <option value="251a300">251 a 300 Trabalhadores</option>
-                        <option value="301a350">301 a 350 Trabalhadores</option>
-                        <option value="351a400">351 a 400 Trabalhadores</option>
-                        <option value="401a450">401 a 450 Trabalhadores</option>
-                        <option value="451a500">451 a 500 Trabalhadores</option>
-                        <option value="501a550">501 a 550 Trabalhadores</option>
-                        <option value="551a600">551 a 600 Trabalhadores</option>
-                        <option value="601a650">601 a 650 Trabalhadores</option>
-                        <option value="651a700">651 a 700 Trabalhadores</option>
-                        <option value="701a750">701 a 750 Trabalhadores</option>
-                        <option value="751a800">751 a 800 Trabalhadores</option>
+                    <label for="regiao-${novoId}" class="form-label text-white">Região:</label>
+                    <select class="form-select regiao-select" id="regiao-${novoId}" name="servicos[${novoIndex}][regiao]" required onchange="atualizarPreco(${novoId})">
+                        <option value="">Selecione a região</option>
+                        <option value="Instituto">Instituto</option>
+                        <option value="Central">Central</option>
+                        <option value="Norte">Norte</option>
+                        <option value="Oeste">Oeste</option>
+                        <option value="Sudoeste">Sudoeste</option>
+                        <option value="Sul">Sul</option>
+                        <option value="Extremo Sul">Extremo Sul</option>
                     </select>
                 </div>
-            </div>
-            
-            <!-- Campos comuns para todos os serviços -->
-            <div class="mb-3">
-                <label for="regiao-${novoId}" class="form-label text-white">Região:</label>
-                <select class="form-select regiao-select" id="regiao-${novoId}" name="servicos[${novoIndex}][regiao]" required onchange="atualizarPreco(${novoId})">
-                    <option value="">Selecione a região</option>
-                    <option value="Instituto">Instituto</option>
-                    <option value="Central">Central</option>
-                    <option value="Norte">Norte</option>
-                    <option value="Oeste">Oeste</option>
-                    <option value="Sudoeste">Sudoeste</option>
-                    <option value="Sul">Sul</option>
-                    <option value="Extremo Sul">Extremo Sul</option>
-                </select>
-            </div>
 
-            <!-- Novo campo para Variável -->
-            <div class="mb-3">
-                <label for="variavel-${novoId}" class="form-label text-white">Selecione a Variável:</label>
-                <select class="form-select variavel-select" id="variavel-${novoId}" name="servicos[${novoIndex}][variavel]" onchange="atualizarPreco(${novoId})">
-                    <option value="">Selecione uma variável</option>
-                </select>
-            </div>
+                <!-- Novo campo para Variável -->
+                <div class="mb-3">
+                    <label for="variavel-${novoId}" class="form-label text-white">Selecione a Variável:</label>
+                    <select class="form-select variavel-select" id="variavel-${novoId}" name="servicos[${novoIndex}][variavel]" onchange="atualizarPreco(${novoId})">
+                        <option value="">Selecione uma variável</option>
+                    </select>
+                </div>
 
-            <div class="mb-3">
-                <label for="quantidade-${novoId}" class="form-label text-white">Quantidade:</label>
-                <input type="number" class="form-control quantidade-input" id="quantidade-${novoId}" name="servicos[${novoIndex}][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(${novoId})">
-            </div>
-            
-            <!-- Etapa 3: Visualização do Preço -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Preço Unitário:</h5>
-                            <h4 class="card-text preco-unitario" id="precoUnitario-${novoId}">${formatarMoeda(0)}</h4>
-                            <input type="hidden" id="precoUnitarioHidden-${novoId}" name="servicos[${novoIndex}][preco_unitario]" value="0">
+                <div class="mb-3">
+                    <label for="quantidade-${novoId}" class="form-label text-white">Quantidade:</label>
+                    <input type="number" class="form-control quantidade-input" id="quantidade-${novoId}" name="servicos[${novoIndex}][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(${novoId})">
+                </div>
+                
+                <!-- Etapa 3: Visualização do Preço -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Preço Unitário:</h5>
+                                <h4 class="card-text preco-unitario" id="precoUnitario-${novoId}">${formatarMoeda(0)}</h4>
+                                <input type="hidden" id="precoUnitarioHidden-${novoId}" name="servicos[${novoIndex}][preco_unitario]" value="0">
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Preço Total:</h5>
-                            <h4 class="card-text preco-total" id="precoTotal-${novoId}">${formatarMoeda(0)}</h4>
-                            <input type="hidden" id="precoTotalHidden-${novoId}" name="servicos[${novoIndex}][preco_total]" value="0">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Preço Total:</h5>
+                                <h4 class="card-text preco-total" id="precoTotal-${novoId}">${formatarMoeda(0)}</h4>
+                                <input type="hidden" id="precoTotalHidden-${novoId}" name="servicos[${novoIndex}][preco_total]" value="0">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-    
-    // Adicionar o novo card ao container
-    servicosContainer.appendChild(novoCard);
-    
-    // Mostrar o botão de remover serviço
-    document.getElementById('removerServico').style.display = 'block';
+        `;
+        
+        // Adicionar o novo card ao container
+        servicosContainer.appendChild(novoCard);
+        
+        // Mostrar o botão de remover serviço
+        const removerBtn = document.getElementById('removerServico');
+        if (removerBtn) {
+            console.log("Exibindo botão de remover serviço");
+            removerBtn.style.display = 'block';
+        } else {
+            console.error("Botão de remover serviço não encontrado");
+        }
+        
+        console.log("Serviço adicionado com sucesso");
+    } catch (error) {
+        console.error("Erro ao adicionar serviço:", error);
+        alert(`Erro ao adicionar serviço: ${error.message}`);
+    }
 }
 
 // Função para remover o último serviço
 function removerServico() {
-    if (contadorServicos > 1) {
+    try {
+        console.log("Função removerServico() iniciada");
+        
         const servicosContainer = document.getElementById('servicos-container');
-        const ultimoServico = document.getElementById(`servico-${contadorServicos}`);
+        const servicoCards = document.querySelectorAll('.servico-card');
         
-        servicosContainer.removeChild(ultimoServico);
-        contadorServicos--;
+        console.log(`Número de cards de serviço encontrados: ${servicoCards.length}`);
         
-        // Esconder o botão de remover se só houver um serviço
-        if (contadorServicos === 1) {
+        if (servicoCards.length <= 1) {
+            console.error("Tentativa de remover o único serviço. Operação cancelada.");
+            alert("Não é possível remover o único serviço!");
+            return;
+        }
+        
+        // Remover o último card
+        const ultimoCard = servicoCards[servicoCards.length - 1];
+        console.log(`Removendo card de serviço com ID: ${ultimoCard.id || 'ID não encontrado'}`);
+        
+        servicosContainer.removeChild(ultimoCard);
+        
+        // Verificar se o botão de remover deve ser escondido
+        if (document.querySelectorAll('.servico-card').length <= 1) {
+            console.log("Escondendo botão de remover serviço");
             document.getElementById('removerServico').style.display = 'none';
         }
         
         // Atualizar o total do orçamento
+        console.log("Atualizando total do orçamento");
         atualizarTotalOrcamento();
+        
+        console.log("Serviço removido com sucesso");
+    } catch (error) {
+        console.error("Erro ao remover serviço:", error);
+        alert(`Erro ao remover serviço: ${error.message}`);
     }
 }
 
-// Inicializar os event listeners quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', function() {
-    // Event listener para o botão de adicionar serviço
-    const btnAdicionarServico = document.getElementById('adicionarServico');
-    if (btnAdicionarServico) {
-        btnAdicionarServico.addEventListener('click', adicionarServico);
+// Função para inicializar os eventos apenas uma vez
+function inicializarEventos() {
+    console.log("Inicializando eventos dos botões");
+    
+    // Remover eventos existentes para evitar duplicação
+    const removerBtn = document.getElementById('removerServico');
+    const adicionarBtn = document.getElementById('adicionarServico');
+    
+    if (removerBtn) {
+        // Remover todos os event listeners existentes
+        const novoRemoverBtn = removerBtn.cloneNode(true);
+        removerBtn.parentNode.replaceChild(novoRemoverBtn, removerBtn);
+        
+        // Adicionar novo event listener
+        console.log("Adicionando evento de clique ao botão de remover serviço");
+        novoRemoverBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevenir comportamento padrão
+            console.log("Botão de remover serviço clicado");
+            removerServico();
+        });
+    } else {
+        console.error("Botão de remover serviço não encontrado");
     }
     
-    // Event listener para o botão de remover serviço
-    const btnRemoverServico = document.getElementById('removerServico');
-    if (btnRemoverServico) {
-        btnRemoverServico.addEventListener('click', removerServico);
+    if (adicionarBtn) {
+        // Remover todos os event listeners existentes
+        const novoAdicionarBtn = adicionarBtn.cloneNode(true);
+        adicionarBtn.parentNode.replaceChild(novoAdicionarBtn, adicionarBtn);
+        
+        // Adicionar novo event listener
+        console.log("Adicionando evento de clique ao botão de adicionar serviço");
+        novoAdicionarBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevenir comportamento padrão
+            console.log("Botão de adicionar serviço clicado");
+            adicionarServico();
+        });
+    } else {
+        console.error("Botão de adicionar serviço não encontrado");
     }
+}
+
+// Inicializar eventos quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM carregado, inicializando...");
+    
+    // Formatar valores iniciais
+    try {
+        document.getElementById('precoUnitario-1').textContent = formatarMoeda(0);
+        document.getElementById('precoTotal-1').textContent = formatarMoeda(0);
+        document.getElementById('totalOrcamento').textContent = formatarMoeda(0);
+    } catch (e) {
+        console.error("Erro ao formatar valores iniciais:", e);
+    }
+    
+    // Inicializar eventos dos botões
+    inicializarEventos();
 
     // Adicionar event listener para atualizar variáveis quando o serviço é alterado
     const servicoSelect = document.getElementById('servico-1-nome');
