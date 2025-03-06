@@ -75,7 +75,7 @@ def carregar_dados_excel():
     
     return dados
 
-def obter_preco_servico(nome_servico, quantidade=1, regiao="Central", variavel=None, grau_risco=None, num_trabalhadores=None):
+def obter_preco_servico(nome_servico, quantidade=1, regiao="Central", variavel=None, grau_risco=None, num_trabalhadores=None, num_ges_ghe=None, num_avaliacoes_adicionais=None):
     """Obtém o preço de um serviço com base nos parâmetros fornecidos"""
     try:
         dados = carregar_dados_excel()
@@ -149,11 +149,22 @@ def obter_preco_servico(nome_servico, quantidade=1, regiao="Central", variavel=N
             
             preco_base = resultado['Preço'].iloc[0]
             
+            # Caso especial para avaliações adicionais
+            if variavel == "Por Avaliação Adicional" and num_avaliacoes_adicionais:
+                preco_base = preco_base * int(num_avaliacoes_adicionais)
+            
             # Verificar se há adicional por GES/GHE
             adicional_ges_ghe = resultado['Adicional_GES_GHE'].iloc[0]
             
-            # Por enquanto, não estamos aplicando o adicional, apenas retornando o preço base
-            return preco_base, "Preço encontrado com sucesso"
+            # Aplicar o adicional por GES/GHE se aplicável
+            preco_final = preco_base
+            if adicional_ges_ghe > 0 and num_ges_ghe and int(num_ges_ghe) > 0:
+                # Subtrair 1 porque o primeiro GES/GHE já está incluído no preço base
+                ges_ghe_adicionais = int(num_ges_ghe) - 1
+                if ges_ghe_adicionais > 0:
+                    preco_final += adicional_ges_ghe * ges_ghe_adicionais
+            
+            return preco_final, "Preço encontrado com sucesso"
     
     except Exception as e:
         app.logger.error(f"Erro ao obter preço: {str(e)}")
@@ -402,7 +413,7 @@ def processar_formulario():
         empresa_cliente = request.form.get('empresa')
         telefone_cliente = request.form.get('telefone', '')
         
-        servicos_form = []
+        servicos_dados = []
         total_orcamento = 0
         
         servicos_keys = [k for k in request.form.keys() if k.startswith('servicos[')]
@@ -422,12 +433,13 @@ def processar_formulario():
                 continue
                 
             regiao = request.form.get(f'servicos[{i}][regiao]', '')
-            quantidade = int(request.form.get(f'servicos[{i}][quantidade]', 1) or 1)
+            quantidade = int(request.form.get(f'servicos[{i}][quantidade]', 1))
             variavel = request.form.get(f'servicos[{i}][variavel]', '')
             preco_unitario = float(request.form.get(f'servicos[{i}][preco_unitario]', 0))
             preco_total = float(request.form.get(f'servicos[{i}][preco_total]', 0))
             grau_risco = request.form.get(f'servicos[{i}][grau_risco]', '')
             num_trabalhadores = request.form.get(f'servicos[{i}][num_trabalhadores]', '')
+            num_ges_ghe = request.form.get(f'servicos[{i}][num_ges_ghe]', '')
             
             servico = {
                 'nome': nome,
@@ -439,20 +451,26 @@ def processar_formulario():
                 'preco_total': preco_total,
                 'variavel': variavel,
                 'grau_risco': grau_risco,
-                'num_trabalhadores': num_trabalhadores
+                'num_trabalhadores': num_trabalhadores,
+                'num_ges_ghe': num_ges_ghe
             }
             
-            servicos_form.append(servico)
+            # Adicionar campos específicos para PGR
+            if "PGR" in nome:
+                servico['grau_risco'] = grau_risco
+                servico['num_trabalhadores'] = num_trabalhadores
+            
+            servicos_dados.append(servico)
             total_orcamento += preco_total
         
-        if not servicos_form:
+        if not servicos_dados:
             flash("Nenhum serviço válido foi adicionado ao orçamento.")
             return redirect(url_for('formulario'))
         
         session['cliente_email'] = cliente_email
         session['empresa_cliente'] = empresa_cliente
         session['telefone_cliente'] = telefone_cliente
-        session['servicos'] = servicos_form
+        session['servicos'] = servicos_dados
         session['total_orcamento'] = total_orcamento
         session['data_orcamento'] = datetime.now().strftime('%d/%m/%Y')
         
@@ -463,27 +481,53 @@ def processar_formulario():
 @app.route('/calcular_preco')
 def calcular_preco():
     """Calcula o preço de um serviço com base nos parâmetros da requisição"""
-    servico = request.args.get('servico')
-    regiao = request.args.get('regiao')
-    variavel = request.args.get('variavel')
-    grau_risco = request.args.get('grau_risco')
-    num_trabalhadores = request.args.get('num_trabalhadores')
-    
-    if not servico or not regiao:
-        return jsonify({'error': 'Parâmetros incompletos'}), 400
-    
-    preco, mensagem = obter_preco_servico(
-        nome_servico=servico,
-        regiao=regiao,
-        variavel=variavel,
-        grau_risco=grau_risco,
-        num_trabalhadores=num_trabalhadores
-    )
-    
-    if preco is None:
-        return jsonify({'error': mensagem}), 404
-    
-    return jsonify({'preco': preco, 'mensagem': mensagem})
+    try:
+        servico = request.args.get('servico')
+        regiao = request.args.get('regiao')
+        variavel = request.args.get('variavel')
+        num_ges_ghe = request.args.get('num_ges_ghe', type=int)
+        quantidade_avaliacoes = request.args.get('quantidade_avaliacoes', type=int)
+        
+        if not servico or not regiao or not variavel:
+            return jsonify({'error': 'Parâmetros incompletos'}), 400
+        
+        dados = carregar_dados_excel()
+        df = dados.get('ambientais')
+        
+        if df is None:
+            return jsonify({'error': 'Dados não encontrados'}), 404
+        
+        # Filtrar por serviço, região e variável
+        filtro = (df['Serviço'] == servico) & (df['Região'] == regiao) & (df['Tipo_Avaliacao'] == variavel)
+        resultado = df[filtro]
+        
+        if resultado.empty:
+            return jsonify({'error': 'Preço não encontrado'}), 404
+        
+        preco_base = float(resultado['Preço'].iloc[0])
+        
+        # Se for serviço com GES/GHE
+        if 'Adicional_GES_GHE' in resultado.columns and num_ges_ghe:
+            adicional_ges_ghe = float(resultado['Adicional_GES_GHE'].iloc[0])
+            # O primeiro GES/GHE já está incluído no preço base
+            if num_ges_ghe > 1:
+                preco_base += adicional_ges_ghe * (num_ges_ghe - 1)
+        
+        # Se tiver avaliações adicionais
+        if quantidade_avaliacoes and variavel == "Pacote (1 a 4 avaliações)":
+            # Buscar o preço da avaliação adicional
+            filtro_adicional = (df['Serviço'] == servico) & (df['Região'] == regiao) & (df['Tipo_Avaliacao'] == "Por Avaliação Adicional")
+            resultado_adicional = df[filtro_adicional]
+            
+            if not resultado_adicional.empty:
+                preco_adicional = float(resultado_adicional['Preço'].iloc[0])
+                preco_base += preco_adicional * quantidade_avaliacoes
+        
+        return jsonify({'preco': preco_base})
+        
+    except Exception as e:
+        app.logger.error(f"Erro ao calcular preço: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/enviar_email/<int:orcamento_id>')
 def enviar_email(orcamento_id):
@@ -510,7 +554,10 @@ def enviar_email(orcamento_id):
 def obter_variaveis():
     """Obtém as variáveis disponíveis para um serviço específico"""
     servico = request.args.get('servico')
+    app.logger.info(f"Obtendo variáveis para serviço: {servico}")
+    
     if not servico:
+        app.logger.error("Serviço não especificado")
         return jsonify({'error': 'Serviço não especificado'}), 400
     
     try:
@@ -518,11 +565,13 @@ def obter_variaveis():
         
         # Se for PGR, não tem variáveis específicas
         if "PGR" in servico:
+            app.logger.info("Serviço PGR, sem variáveis")
             return jsonify({'variaveis': []})
         
         # Para serviços ambientais
         df = dados.get('ambientais')
         if df is None:
+            app.logger.error("Dados ambientais não encontrados")
             return jsonify({'error': 'Dados ambientais não encontrados'}), 404
         
         # Filtrar por serviço
@@ -530,15 +579,31 @@ def obter_variaveis():
         resultado = df[filtro]
         
         if resultado.empty:
+            app.logger.info(f"Nenhum resultado encontrado para o serviço: {servico}")
             return jsonify({'variaveis': []})
         
-        # Obter valores únicos da coluna Tipo_Avaliacao
-        variaveis = resultado['Tipo_Avaliacao'].unique().tolist()
+        # Obter valores únicos da coluna Tipo_Avaliacao e converter para lista Python nativa
+        variaveis_np = resultado['Tipo_Avaliacao'].unique()
+        # Converter para lista Python e remover duplicatas
+        variaveis = sorted(list(set([str(v) for v in variaveis_np])))
         
-        return jsonify({'variaveis': variaveis})
+        app.logger.info(f"Variáveis encontradas: {variaveis}")
+        
+        # Verificar se o serviço requer GES/GHE
+        requer_ges_ghe = False
+        if 'Adicional_GES_GHE' in resultado.columns:
+            # Converter numpy.bool_ para bool Python nativo
+            requer_ges_ghe = bool((resultado['Adicional_GES_GHE'] > 0).any())
+        
+        return jsonify({
+            'variaveis': variaveis,
+            'requer_ges_ghe': requer_ges_ghe
+        })
     
     except Exception as e:
         app.logger.error(f"Erro ao obter variáveis: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 # Configuração para Vercel

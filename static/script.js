@@ -3,71 +3,128 @@ let contadorServicos = 1;
 
 // Função para mostrar campos adicionais quando PGR for selecionado
 function mostrarCamposAdicionais(id) {
-    const servico = document.getElementById(`servico-${id}-nome`).value;
-    const parametrosPGR = document.getElementById(`parametros-pgr-${id}`);
+    const servicoSelect = document.getElementById(`servico-${id}-nome`);
+    const servicoSelecionado = servicoSelect.value;
+    const parametrosPgr = document.getElementById(`parametros-pgr-${id}`);
+    const variavelContainer = document.getElementById(`variavel-${id}`).parentElement;
+    const gesGheContainer = document.getElementById(`ges-ghe-container-${id}`);
+    const avaliacoesAdicionaisContainer = document.getElementById(`avaliacoes-adicionais-container-${id}`);
     
-    if (servico === 'Elaboração e acompanhamento do PGR') {
-        parametrosPGR.style.display = 'block';
-        atualizarPreco(id); // Atualiza o preço imediatamente
+    // Esconder campos específicos inicialmente
+    parametrosPgr.style.display = "none";
+    gesGheContainer.style.display = "none";
+    avaliacoesAdicionaisContainer.style.display = "none";
+    
+    if (!servicoSelecionado) return;
+    
+    // Se for um serviço de PGR, mostrar os campos específicos de PGR
+    if (servicoSelecionado.includes("PGR") || servicoSelecionado.includes("Elaboração e acompanhamento do PGR")) {
+        parametrosPgr.style.display = "block";
+        variavelContainer.style.display = "none"; // Esconder variáveis apenas para PGR
     } else {
-        parametrosPGR.style.display = 'none';
-        atualizarPreco(id); // Atualiza o preço para outros serviços
+        // Para outros serviços, mostrar o campo de variáveis e atualizar as opções
+        parametrosPgr.style.display = "none";
+        variavelContainer.style.display = "block"; // Mostrar variáveis para outros serviços
+        atualizarVariaveisDisponiveis(id, servicoSelecionado);
+        
+        // Verificar se o serviço requer campo GES/GHE
+        const servicosComGesGhe = [
+            "Laudo de Insalubridade",
+            "Revisão de Laudo de Insalubridade (após 90 dias)",
+            "LTCAT - Condições Ambientais de Trabalho",
+            "Revisão de LTCAT (após 90 dias)"
+        ];
+        
+        if (servicosComGesGhe.some(s => servicoSelecionado.includes(s))) {
+            gesGheContainer.style.display = "block";
+        }
     }
-    
-    // Adicionar chamada para atualizar as variáveis disponíveis
-    atualizarVariaveisDisponiveis(id, servico);
 }
 
-// Adicionar nova função para atualizar as variáveis disponíveis
+// Corrigir a função atualizarVariaveisDisponiveis para evitar duplicatas
 function atualizarVariaveisDisponiveis(id, servico) {
+    console.log(`Atualizando variáveis para serviço: ${servico}, id: ${id}`);
+    
     if (!servico) return;
     
-    // Limpar o select de variáveis
     const variavelSelect = document.getElementById(`variavel-${id}`);
+    const variavelContainer = variavelSelect.parentElement;
+    const avaliacaoAdicionalContainer = document.getElementById(`avaliacao-adicional-container-${id}`);
+    const quantidadeAvaliacoesContainer = document.getElementById(`quantidade-avaliacoes-container-${id}`);
+    
+    // Limpar e mostrar o select de variáveis
     variavelSelect.innerHTML = '<option value="">Selecione uma variável</option>';
+    variavelContainer.style.display = "block";
     
-    // Se for PGR, esconder o campo de variáveis e mostrar os campos específicos de PGR
-    if (servico.includes("PGR")) {
-        document.getElementById(`parametros-pgr-${id}`).style.display = "block";
-        variavelSelect.parentElement.style.display = "none";
-        return;
-    }
+    // Esconder containers adicionais inicialmente
+    if (avaliacaoAdicionalContainer) avaliacaoAdicionalContainer.style.display = "none";
+    if (quantidadeAvaliacoesContainer) quantidadeAvaliacoesContainer.style.display = "none";
     
-    // Para outros serviços, esconder os campos de PGR e mostrar o campo de variáveis
-    document.getElementById(`parametros-pgr-${id}`).style.display = "none";
-    variavelSelect.parentElement.style.display = "block";
+    // Serviços que usam o padrão Pacote + Avaliação Adicional
+    const servicosPacote = [
+        "Coleta para Avaliação Ambiental",
+        "Ruído Limítrofe (NBR 10151)"
+    ];
     
-    // Fazer requisição para obter as variáveis disponíveis
-    fetch(`/obter_variaveis?servico=${encodeURIComponent(servico)}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error("Erro ao obter variáveis:", data.error);
-                return;
+    // Serviços que usam apenas uma variável única
+    const servicosUnitarios = [
+        "Relatório Técnico por Agente Ambiental",
+        "Revisão de Relatório Técnico (após 90 dias)",
+        "Laudo de Periculosidade",
+        "Revisão de Laudo de Periculosidade (após 90 dias)"
+    ];
+    
+    // Serviços que usam GES/GHE
+    const servicosGesGhe = [
+        "Laudo de Insalubridade",
+        "Revisão de Laudo de Insalubridade (após 90 dias)",
+        "LTCAT - Condições Ambientais de Trabalho",
+        "Revisão de LTCAT (após 90 dias)"
+    ];
+    
+    if (servicosPacote.includes(servico)) {
+        // Adicionar opção de pacote
+        const optionPacote = document.createElement('option');
+        optionPacote.value = "Pacote (1 a 4 avaliações)";
+        optionPacote.textContent = "Pacote (1 a 4 avaliações)";
+        variavelSelect.appendChild(optionPacote);
+        
+        // Adicionar event listener para mostrar opção de avaliação adicional
+        variavelSelect.addEventListener('change', function() {
+            if (this.value === "Pacote (1 a 4 avaliações)") {
+                avaliacaoAdicionalContainer.style.display = "block";
+            } else {
+                avaliacaoAdicionalContainer.style.display = "none";
+                quantidadeAvaliacoesContainer.style.display = "none";
             }
-            
-            const variaveis = data.variaveis || [];
-            
-            // Se não houver variáveis, esconder o campo
-            if (variaveis.length === 0) {
-                variavelSelect.parentElement.style.display = "none";
-                return;
-            }
-            
-            // Adicionar as variáveis ao select
-            variaveis.forEach(variavel => {
-                const option = document.createElement('option');
-                option.value = variavel;
-                option.textContent = variavel;
-                variavelSelect.appendChild(option);
-            });
-            
-            // Mostrar o campo de variáveis
-            variavelSelect.parentElement.style.display = "block";
-        })
-        .catch(error => {
-            console.error("Erro na requisição:", error);
+            atualizarPreco(id);
         });
+    } 
+    else if (servicosUnitarios.includes(servico)) {
+        // Adicionar opção unitária apropriada
+        const optionUnitaria = document.createElement('option');
+        optionUnitaria.value = "Por Relatório Unitário";
+        optionUnitaria.textContent = "Por Relatório Unitário";
+        
+        if (servico.includes("Periculosidade")) {
+            optionUnitaria.value = "Por Laudo Técnico";
+            optionUnitaria.textContent = "Por Laudo Técnico";
+        }
+        
+        variavelSelect.appendChild(optionUnitaria);
+    }
+    else if (servicosGesGhe.includes(servico)) {
+        // Adicionar opção GES/GHE apropriada
+        const optionGesGhe = document.createElement('option');
+        if (servico.includes("Revisão")) {
+            optionGesGhe.value = "Adicional por GES/GHE Revisado";
+            optionGesGhe.textContent = "Adicional por GES/GHE Revisado";
+        } else {
+            optionGesGhe.value = "Base + Adicional por GES/GHE";
+            optionGesGhe.textContent = "Base + Adicional por GES/GHE";
+        }
+        variavelSelect.appendChild(optionGesGhe);
+    }
 }
 
 // Função para formatar valores monetários no padrão brasileiro (R$ 2.502,00)
@@ -89,9 +146,10 @@ function atualizarPreco(id) {
     const variavelSelect = document.getElementById(`variavel-${id}`);
     const precoUnitarioElement = document.getElementById(`precoUnitario-${id}`);
     const precoUnitarioHidden = document.getElementById(`precoUnitarioHidden-${id}`);
+    const numGesGheInput = document.getElementById(`num-ges-ghe-${id}`);
     
     // Verificar se os campos obrigatórios estão preenchidos
-    if (!servicoSelect.value || !regiaoSelect.value) {
+    if (!servicoSelect.value || !regiaoSelect.value || !variavelSelect.value) {
         precoUnitarioElement.textContent = formatarMoeda(0);
         precoUnitarioHidden.value = 0;
         atualizarPrecoTotal(id);
@@ -101,37 +159,33 @@ function atualizarPreco(id) {
     // Parâmetros para a requisição
     const params = new URLSearchParams({
         servico: servicoSelect.value,
-        regiao: regiaoSelect.value
+        regiao: regiaoSelect.value,
+        variavel: variavelSelect.value
     });
     
-    // Adicionar variável se estiver disponível e não for um serviço de PGR
-    if (!servicoSelect.value.includes("PGR") && !servicoSelect.value.includes("Elaboração e acompanhamento do PGR") && 
-        variavelSelect.style.display !== "none" && variavelSelect.value) {
-        params.append('variavel', variavelSelect.value);
+    // Verificar se é um serviço com GES/GHE
+    const servicosGesGhe = [
+        "Laudo de Insalubridade",
+        "Revisão de Laudo de Insalubridade (após 90 dias)",
+        "LTCAT - Condições Ambientais de Trabalho",
+        "Revisão de LTCAT (após 90 dias)"
+    ];
+    
+    // Se for serviço com GES/GHE e tiver o número de GES/GHE preenchido
+    if (servicosGesGhe.includes(servicoSelect.value) && numGesGheInput) {
+        const numGesGhe = parseInt(numGesGheInput.value) || 0;
+        params.append('num_ges_ghe', numGesGhe);
     }
     
-    // Adicionar parâmetros específicos para PGR
-    if (servicoSelect.value.includes("PGR") || servicoSelect.value.includes("Elaboração e acompanhamento do PGR")) {
-        const grauRiscoElements = document.getElementsByName(`servicos[${id-1}][grau_risco]`);
-        let grauRisco = "";
-        for (const element of grauRiscoElements) {
-            if (element.checked) {
-                grauRisco = element.value;
-                break;
-            }
-        }
-        
-        const numTrabalhadores = document.getElementById(`numTrabalhadores-${id}`).value;
-        
-        if (!grauRisco || !numTrabalhadores) {
-            precoUnitarioElement.textContent = formatarMoeda(0);
-            precoUnitarioHidden.value = 0;
-            atualizarPrecoTotal(id);
-            return;
-        }
-        
-        params.append('grau_risco', grauRisco);
-        params.append('num_trabalhadores', numTrabalhadores);
+    // Verificar se tem avaliações adicionais
+    const avaliacaoAdicionalSelect = document.getElementById(`avaliacao-adicional-${id}`);
+    const quantidadeAvaliacoesInput = document.getElementById(`quantidade-avaliacoes-${id}`);
+    
+    if (avaliacaoAdicionalSelect && 
+        avaliacaoAdicionalSelect.value === "sim" && 
+        quantidadeAvaliacoesInput && 
+        quantidadeAvaliacoesInput.style.display !== "none") {
+        params.append('quantidade_avaliacoes', quantidadeAvaliacoesInput.value);
     }
     
     // Fazer requisição para obter o preço
@@ -290,6 +344,30 @@ function adicionarServico() {
                     </select>
                 </div>
 
+                <!-- Campo para número de avaliações adicionais -->
+                <div class="mb-3 avaliacoes-adicionais-container" id="avaliacoes-adicionais-container-${novoId}" style="display: none;">
+                    <label for="num-avaliacoes-adicionais-${novoId}" class="form-label text-white">Número de Avaliações Adicionais:</label>
+                    <select class="form-select" id="num-avaliacoes-adicionais-${novoId}" name="servicos[${novoIndex}][num_avaliacoes_adicionais]" onchange="atualizarPrecoAvaliacoesAdicionais(${novoId})">
+                        <option value="1">1 avaliação adicional</option>
+                        <option value="2">2 avaliações adicionais</option>
+                        <option value="3">3 avaliações adicionais</option>
+                        <option value="4">4 avaliações adicionais</option>
+                        <option value="5">5 avaliações adicionais</option>
+                        <option value="6">6 avaliações adicionais</option>
+                        <option value="7">7 avaliações adicionais</option>
+                        <option value="8">8 avaliações adicionais</option>
+                        <option value="9">9 avaliações adicionais</option>
+                        <option value="10">10 avaliações adicionais</option>
+                    </select>
+                </div>
+
+                <!-- Campo para número de GES/GHE -->
+                <div class="mb-3 ges-ghe-container" id="ges-ghe-container-${novoId}" style="display: none;">
+                    <label for="num-ges-ghe-${novoId}" class="form-label text-white">Número de GES/GHE:</label>
+                    <input type="number" class="form-control num-ges-ghe" id="num-ges-ghe-${novoId}" name="servicos[${novoIndex}][num_ges_ghe]" value="1" min="1" onchange="atualizarPreco(${novoId})">
+                    <small class="form-text text-muted text-white">Grupos de Exposição Similar/Grupos Homogêneos de Exposição</small>
+                </div>
+
                 <div class="mb-3">
                     <label for="quantidade-${novoId}" class="form-label text-white">Quantidade:</label>
                     <input type="number" class="form-control quantidade-input" id="quantidade-${novoId}" name="servicos[${novoIndex}][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(${novoId})">
@@ -330,6 +408,9 @@ function adicionarServico() {
         } else {
             console.error("Botão de remover serviço não encontrado");
         }
+        
+        // Adicionar event listener para o select de variáveis
+        adicionarEventListenerVariavel(novoId);
         
         console.log("Serviço adicionado com sucesso");
     } catch (error) {
@@ -455,4 +536,58 @@ document.addEventListener('DOMContentLoaded', function() {
             atualizarPreco(id);
         });
     });
+
+    // Adicionar event listener para o select de variáveis do primeiro serviço
+    adicionarEventListenerVariavel(1);
+
+    // Verificar todos os serviços existentes e mostrar campos de variáveis se necessário
+    const servicoSelects = document.querySelectorAll('[id^="servico-"][id$="-nome"]');
+    servicoSelects.forEach(select => {
+        const id = select.id.match(/servico-(\d+)-nome/)[1];
+        const servicoSelecionado = select.value;
+        
+        if (servicoSelecionado && !servicoSelecionado.includes("PGR")) {
+            console.log(`Serviço ${id} já selecionado: ${servicoSelecionado}`);
+            const variavelContainer = document.getElementById(`variavel-${id}`).parentElement;
+            variavelContainer.style.display = "block";
+            atualizarVariaveisDisponiveis(id, servicoSelecionado);
+        }
+    });
 });
+
+// Adicionar um event listener para o select de variáveis
+function adicionarEventListenerVariavel(id) {
+    const variavelSelect = document.getElementById(`variavel-${id}`);
+    const avaliacoesAdicionaisContainer = document.getElementById(`avaliacoes-adicionais-container-${id}`);
+    
+    variavelSelect.addEventListener('change', function() {
+        // Se a variável for "Por Avaliação Adicional", mostrar o campo de avaliações adicionais
+        if (this.value === "Por Avaliação Adicional") {
+            avaliacoesAdicionaisContainer.style.display = "block";
+        } else {
+            avaliacoesAdicionaisContainer.style.display = "none";
+        }
+        
+        atualizarPreco(id);
+    });
+}
+
+// Função para calcular o preço com base no número de avaliações adicionais
+function atualizarPrecoAvaliacoesAdicionais(id) {
+    // Apenas chama a função atualizarPreco que já deve lidar com isso
+    atualizarPreco(id);
+}
+
+// Função para gerenciar a seleção de avaliação adicional
+function toggleQuantidadeAvaliacoes(id) {
+    const avaliacaoAdicionalSelect = document.getElementById(`avaliacao-adicional-${id}`);
+    const quantidadeAvaliacoesContainer = document.getElementById(`quantidade-avaliacoes-container-${id}`);
+    
+    if (avaliacaoAdicionalSelect.value === "sim") {
+        quantidadeAvaliacoesContainer.style.display = "block";
+    } else {
+        quantidadeAvaliacoesContainer.style.display = "none";
+    }
+    
+    atualizarPreco(id);
+}

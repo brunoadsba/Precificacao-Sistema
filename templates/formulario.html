@@ -112,6 +112,27 @@
                         </select>
                     </div>
 
+                    <!-- Após o campo de variável -->
+                    <div class="mb-3" id="avaliacao-adicional-container-1" style="display: none;">
+                        <label for="avaliacao-adicional-1" class="form-label text-white">Deseja adicionar Avaliação Adicional?</label>
+                        <select class="form-select" id="avaliacao-adicional-1" name="servicos[0][avaliacao_adicional]" onchange="toggleQuantidadeAvaliacoes(1)">
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="quantidade-avaliacoes-container-1" style="display: none;">
+                        <label for="quantidade-avaliacoes-1" class="form-label text-white">Quantidade de Avaliações Adicionais:</label>
+                        <input type="number" class="form-control" id="quantidade-avaliacoes-1" name="servicos[0][quantidade_avaliacoes]" value="1" min="1" max="10" onchange="atualizarPreco(1)">
+                        <small class="form-text text-muted text-white">Máximo de 10 avaliações adicionais</small>
+                    </div>
+
+                    <div class="mb-3 ges-ghe-container" id="ges-ghe-container-1" style="display: none;">
+                        <label for="num-ges-ghe-1" class="form-label text-white">Número de GES/GHE:</label>
+                        <input type="number" class="form-control num-ges-ghe" id="num-ges-ghe-1" name="servicos[0][num_ges_ghe]" value="1" min="1" onchange="atualizarPreco(1)">
+                        <small class="form-text text-muted text-white">Grupos de Exposição Similar/Grupos Homogêneos de Exposição</small>
+                    </div>
+
                     <div class="mb-3">
                         <label for="quantidade-1" class="form-label text-white">Quantidade:</label>
                         <input type="number" class="form-control quantidade-input" id="quantidade-1" name="servicos[0][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(1)">
