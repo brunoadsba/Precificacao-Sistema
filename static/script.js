@@ -148,8 +148,11 @@ function atualizarPreco(id) {
     const precoUnitarioHidden = document.getElementById(`precoUnitarioHidden-${id}`);
     const numGesGheInput = document.getElementById(`num-ges-ghe-${id}`);
     
+    // Verificar se é um serviço de PGR
+    const isPGR = servicoSelect.value.includes("PGR");
+    
     // Verificar se os campos obrigatórios estão preenchidos
-    if (!servicoSelect.value || !regiaoSelect.value || !variavelSelect.value) {
+    if (!servicoSelect.value || !regiaoSelect.value || (!isPGR && !variavelSelect.value)) {
         precoUnitarioElement.textContent = formatarMoeda(0);
         precoUnitarioHidden.value = 0;
         atualizarPrecoTotal(id);
@@ -159,9 +162,36 @@ function atualizarPreco(id) {
     // Parâmetros para a requisição
     const params = new URLSearchParams({
         servico: servicoSelect.value,
-        regiao: regiaoSelect.value,
-        variavel: variavelSelect.value
+        regiao: regiaoSelect.value
     });
+    
+    // Adicionar variável apenas se não for PGR
+    if (!isPGR) {
+        params.append('variavel', variavelSelect.value);
+    }
+    
+    // Se for PGR, adicionar parâmetros específicos
+    if (isPGR) {
+        const grauRiscoInputs = document.querySelectorAll(`input[name="servicos[${id-1}][grau_risco]"]`);
+        let grauRiscoSelecionado = '';
+        grauRiscoInputs.forEach(input => {
+            if (input.checked) {
+                grauRiscoSelecionado = input.value;
+            }
+        });
+        
+        const numTrabalhadores = document.getElementById(`numTrabalhadores-${id}`);
+        
+        if (!grauRiscoSelecionado || !numTrabalhadores.value) {
+            precoUnitarioElement.textContent = formatarMoeda(0);
+            precoUnitarioHidden.value = 0;
+            atualizarPrecoTotal(id);
+            return;
+        }
+        
+        params.append('grau_risco', grauRiscoSelecionado);
+        params.append('num_trabalhadores', numTrabalhadores.value);
+    }
     
     // Verificar se é um serviço com GES/GHE
     const servicosGesGhe = [

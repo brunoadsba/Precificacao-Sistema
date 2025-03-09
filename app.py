@@ -16,8 +16,8 @@ load_dotenv()
 # Função para verificar a estrutura da planilha
 def verificar_planilha():
     """Verifica se os arquivos CSV existem"""
-    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
-    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv')
+    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv')
     
     if not os.path.exists(pgr_path):
         return False, f"Arquivo não encontrado: {pgr_path}"
@@ -32,7 +32,7 @@ def obter_servicos():
     servicos = set()
     
     # Carregar serviços do arquivo PGR
-    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
+    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv')
     if os.path.exists(pgr_path):
         try:
             df_pgr = pd.read_csv(pgr_path)
@@ -41,7 +41,7 @@ def obter_servicos():
             app.logger.error(f"Erro ao ler arquivo PGR: {str(e)}")
     
     # Carregar serviços do arquivo Ambientais
-    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv')
     if os.path.exists(ambientais_path):
         try:
             df_ambientais = pd.read_csv(ambientais_path)
@@ -56,7 +56,7 @@ def carregar_dados_excel():
     dados = {}
     
     # Carregar dados do arquivo PGR
-    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
+    pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv')
     if os.path.exists(pgr_path):
         try:
             df_pgr = pd.read_csv(pgr_path)
@@ -65,7 +65,7 @@ def carregar_dados_excel():
             app.logger.error(f"Erro ao ler arquivo PGR: {str(e)}")
     
     # Carregar dados do arquivo Ambientais
-    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+    ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv')
     if os.path.exists(ambientais_path):
         try:
             df_ambientais = pd.read_csv(ambientais_path)
@@ -215,7 +215,7 @@ def formulario():
             print(f"Quantidades: {quantidades}")
             print(f"Regiões: {regioes}")
             print(f"Variáveis: {variaveis}")
-            print(f"Grau de Risco: {grau_risks}")
+            print(f"Grau de Risco: {grau_riscos}")
             print(f"Número de Trabalhadores: {num_trabalhadores}")
             
             if not nomes:
@@ -229,10 +229,14 @@ def formulario():
                 quantidade = int(quantidades[i]) if i < len(quantidades) and quantidades[i].isdigit() else 1
                 regiao = regioes[i] if i < len(regioes) else "Central"
                 variavel = variaveis[i] if i < len(variaveis) else None
-                grau_risco = grau_risks[i] if i < len(grau_risks) else None
+                grau_risco = grau_riscos[i] if i < len(grau_riscos) else None
                 num_trabalhador = num_trabalhadores[i] if i < len(num_trabalhadores) else None
                 
-                preco_unitario, resultado = obter_preco_servico(nome, quantidade, regiao, variavel, grau_risco, num_trabalhador)
+                # Obter os valores de GES/GHE e avaliações adicionais
+                num_ges_ghe = request.form.getlist('servicos[][num_ges_ghe]')[i] if i < len(request.form.getlist('servicos[][num_ges_ghe]')) else None
+                num_avaliacoes_adicionais = request.form.getlist('servicos[][quantidade_avaliacoes]')[i] if i < len(request.form.getlist('servicos[][quantidade_avaliacoes]')) else None
+                
+                preco_unitario, resultado = obter_preco_servico(nome, quantidade, regiao, variavel, grau_risco, num_trabalhador, num_ges_ghe, num_avaliacoes_adicionais)
                 preco_total = preco_unitario * quantidade
                 
                 print(f"Serviço {i+1}: {nome}, Preço unitário: {preco_unitario}, Preço total: {preco_total}, Variável: {variavel}, Grau de Risco: {grau_risco}, Número de Trabalhadores: {num_trabalhador}")
@@ -364,8 +368,8 @@ def confirmacao():
 def explorar_planilha():
     """Função para explorar os dados dos arquivos CSV (para debug)"""
     try:
-        pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv.txt')
-        ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv.txt')
+        pgr_path = os.path.join(os.path.dirname(__file__), 'Precos_PGR.csv')
+        ambientais_path = os.path.join(os.path.dirname(__file__), 'Precos_Ambientais.csv')
         
         resultado = {}
         
@@ -487,43 +491,98 @@ def calcular_preco():
         variavel = request.args.get('variavel')
         num_ges_ghe = request.args.get('num_ges_ghe', type=int)
         quantidade_avaliacoes = request.args.get('quantidade_avaliacoes', type=int)
+        grau_risco = request.args.get('grau_risco')
+        num_trabalhadores = request.args.get('num_trabalhadores')
         
-        if not servico or not regiao or not variavel:
+        if not servico or not regiao:
             return jsonify({'error': 'Parâmetros incompletos'}), 400
         
         dados = carregar_dados_excel()
-        df = dados.get('ambientais')
         
-        if df is None:
-            return jsonify({'error': 'Dados não encontrados'}), 404
-        
-        # Filtrar por serviço, região e variável
-        filtro = (df['Serviço'] == servico) & (df['Região'] == regiao) & (df['Tipo_Avaliacao'] == variavel)
-        resultado = df[filtro]
-        
-        if resultado.empty:
-            return jsonify({'error': 'Preço não encontrado'}), 404
-        
-        preco_base = float(resultado['Preço'].iloc[0])
-        
-        # Se for serviço com GES/GHE
-        if 'Adicional_GES_GHE' in resultado.columns and num_ges_ghe:
-            adicional_ges_ghe = float(resultado['Adicional_GES_GHE'].iloc[0])
-            # O primeiro GES/GHE já está incluído no preço base
-            if num_ges_ghe > 1:
-                preco_base += adicional_ges_ghe * (num_ges_ghe - 1)
-        
-        # Se tiver avaliações adicionais
-        if quantidade_avaliacoes and variavel == "Pacote (1 a 4 avaliações)":
-            # Buscar o preço da avaliação adicional
-            filtro_adicional = (df['Serviço'] == servico) & (df['Região'] == regiao) & (df['Tipo_Avaliacao'] == "Por Avaliação Adicional")
-            resultado_adicional = df[filtro_adicional]
+        # Verificar se é um serviço de PGR
+        if "PGR" in servico:
+            if not grau_risco or not num_trabalhadores:
+                return jsonify({'error': 'Parâmetros incompletos para PGR'}), 400
+                
+            df = dados.get('pgr')
+            if df is None:
+                return jsonify({'error': 'Dados de PGR não encontrados'}), 404
+                
+            # Mapear a faixa de trabalhadores
+            faixa_trab_map = {
+                'ate19': 'Até 19 Trab.',
+                '20a50': '20 a 50 Trab.',
+                '51a100': '51 a 100 Trab.',
+                '101a160': '101 a 160 Trab.',
+                '161a250': '161 a 250 Trab.',
+                '251a300': '251 a 300 Trab.',
+                '301a350': '301 a 350 Trab.',
+                '351a400': '351 a 400 Trab.',
+                '401a450': '401 a 450 Trab.',
+                '451a500': '451 a 500 Trab.',
+                '501a550': '501 a 550 Trab.',
+                '551a600': '551 a 600 Trab.',
+                '601a650': '601 a 650 Trab.',
+                '651a700': '651 a 700 Trab.',
+                '701a750': '701 a 750 Trab.',
+                '751a800': '751 a 800 Trab.'
+            }
             
-            if not resultado_adicional.empty:
-                preco_adicional = float(resultado_adicional['Preço'].iloc[0])
-                preco_base += preco_adicional * quantidade_avaliacoes
+            faixa_trab = faixa_trab_map.get(num_trabalhadores)
+            if not faixa_trab:
+                return jsonify({'error': f'Faixa de trabalhadores inválida: {num_trabalhadores}'}), 400
+                
+            # Filtrar por serviço, grau de risco, região e faixa de trabalhadores
+            filtro = (df['Serviço'] == servico) & (df['Grau_Risco'] == grau_risco) & (df['Região'] == regiao) & (df['Faixa_Trab'] == faixa_trab)
+            resultado = df[filtro]
+            
+            if resultado.empty:
+                return jsonify({'error': f'Preço não encontrado para os parâmetros: {servico}, {grau_risco}, {regiao}, {faixa_trab}'}), 404
+                
+            preco_base = float(resultado['Preço'].iloc[0])
+            return jsonify({'preco': preco_base})
         
-        return jsonify({'preco': preco_base})
+        # Para serviços ambientais
+        else:
+            if not variavel:
+                return jsonify({'error': 'Variável não especificada para serviço ambiental'}), 400
+                
+            df = dados.get('ambientais')
+            if df is None:
+                return jsonify({'error': 'Dados ambientais não encontrados'}), 404
+            
+            # Ajustar região para Sul e Extremo Sul se necessário
+            regiao_ajustada = regiao
+            if regiao in ["Sul", "Extremo Sul"]:
+                regiao_ajustada = "Sul e Extremo Sul"
+            
+            # Filtrar por serviço, região e variável
+            filtro = (df['Serviço'] == servico) & (df['Região'] == regiao_ajustada) & (df['Tipo_Avaliacao'] == variavel)
+            resultado = df[filtro]
+            
+            if resultado.empty:
+                return jsonify({'error': f'Preço não encontrado para os parâmetros: {servico}, {regiao_ajustada}, {variavel}'}), 404
+            
+            preco_base = float(resultado['Preço'].iloc[0])
+            
+            # Se for serviço com GES/GHE
+            if 'Adicional_GES_GHE' in resultado.columns and num_ges_ghe:
+                adicional_ges_ghe = float(resultado['Adicional_GES_GHE'].iloc[0])
+                # O primeiro GES/GHE já está incluído no preço base
+                if num_ges_ghe > 1:
+                    preco_base += adicional_ges_ghe * (num_ges_ghe - 1)
+            
+            # Se tiver avaliações adicionais
+            if quantidade_avaliacoes and variavel == "Pacote (1 a 4 avaliações)":
+                # Buscar o preço da avaliação adicional
+                filtro_adicional = (df['Serviço'] == servico) & (df['Região'] == regiao_ajustada) & (df['Tipo_Avaliacao'] == "Por Avaliação Adicional")
+                resultado_adicional = df[filtro_adicional]
+                
+                if not resultado_adicional.empty:
+                    preco_adicional = float(resultado_adicional['Preço'].iloc[0])
+                    preco_base += preco_adicional * quantidade_avaliacoes
+            
+            return jsonify({'preco': preco_base})
         
     except Exception as e:
         app.logger.error(f"Erro ao calcular preço: {str(e)}")
