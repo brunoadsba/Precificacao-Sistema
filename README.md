@@ -2,6 +2,9 @@
 
 Sistema web desenvolvido para automatizar a geração de orçamentos de serviços de saúde e segurança ocupacional, com suporte a múltiplos tipos de serviços e cálculos complexos de precificação.
 
+![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
+![Status](https://img.shields.io/badge/status-produção-green)
+
 ## 🚀 Funcionalidades
 
 - Geração automática de orçamentos
@@ -74,6 +77,36 @@ SECRET_KEY=sua-chave-secreta
 python app.py
 \`\`\`
 
+## 📝 Exemplos de Uso
+
+### Exemplo 1: Criando um orçamento para Avaliação Ambiental
+
+1. Acesse a página inicial do sistema
+2. Preencha os dados do cliente (empresa, e-mail, telefone)
+3. Selecione o serviço "Coleta para Avaliação Ambiental"
+4. Escolha a região "Central"
+5. Selecione a variável "Pacote (1 a 4 avaliações)"
+6. Defina a quantidade como "1"
+7. O sistema calculará automaticamente o preço (R$ 300,00)
+8. Clique em "Gerar Orçamento"
+9. Revise os dados na tela de resumo
+10. Confirme para gerar o orçamento final
+11. Envie por e-mail ou salve para uso posterior
+
+### Exemplo 2: Orçamento de PGR com múltiplos serviços
+
+1. Preencha os dados do cliente
+2. Selecione o serviço "Elaboração e acompanhamento do PGR"
+3. Escolha o grau de risco "3 e 4"
+4. Selecione a faixa de trabalhadores "20 a 50 Trab."
+5. Escolha a região "Norte"
+6. Clique em "Adicionar Serviço" para incluir um segundo serviço
+7. No novo serviço, selecione "Laudo de Insalubridade"
+8. Defina o número de GES/GHE como "2"
+9. Escolha a região "Norte"
+10. O sistema calculará o valor total do orçamento combinando ambos os serviços
+11. Prossiga com a geração do orçamento
+
 ## 🖥️ Interface
 
 ### Formulário Principal
@@ -110,6 +143,49 @@ O sistema utiliza SMTP do Gmail para envio de orçamentos. É necessário:
 1. Habilitar autenticação de duas etapas no Gmail
 2. Gerar senha de aplicativo
 3. Configurar as variáveis de ambiente
+
+## ❓ Troubleshooting
+
+### Problemas comuns e soluções
+
+1. **Erro ao enviar e-mail**
+   - Verifique se as credenciais no arquivo `.env` estão corretas
+   - Confirme se a autenticação de duas etapas está ativada no Gmail
+   - Verifique se a senha de aplicativo foi gerada corretamente
+
+2. **Preços não aparecem corretamente**
+   - Verifique se os arquivos CSV de preços estão no formato correto
+   - Confirme se todos os parâmetros necessários foram selecionados
+   - Reinicie a aplicação para recarregar os dados de preços
+
+3. **Erro ao adicionar múltiplos serviços**
+   - Limite máximo de 10 serviços por orçamento
+   - Verifique se o JavaScript está habilitado no navegador
+   - Tente usar um navegador diferente se o problema persistir
+
+4. **Problemas de visualização em dispositivos móveis**
+   - Certifique-se de usar um navegador atualizado
+   - Limpe o cache do navegador
+   - Verifique se o zoom está configurado para 100%
+
+## 🔮 Roadmap
+
+### Próximas atualizações planejadas
+
+#### Versão 1.1.0 (Prevista para Julho/2025)
+- Integração com sistema de pagamento online
+- Exportação de orçamentos em formato PDF
+- Histórico de orçamentos por cliente
+
+#### Versão 1.2.0 (Prevista para Outubro/2025)
+- Área de cliente com login
+- Dashboard administrativo com estatísticas
+- Notificações automáticas de acompanhamento
+
+#### Versão 2.0.0 (Prevista para 2026)
+- Aplicativo móvel para Android e iOS
+- Integração com sistemas ERP
+- Módulo de assinatura digital de contratos
 
 ## 🤝 Contribuindo
 
