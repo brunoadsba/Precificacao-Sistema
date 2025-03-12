@@ -870,71 +870,82 @@ def gerar_orcamento():
         
         app.logger.info(f"PDF gerado com sucesso em memória")
         
+        # Verificar se estamos em ambiente de produção (Vercel)
+        is_vercel = os.environ.get('VERCEL', False)
+        
         # Enviar e-mail com o orçamento, se o e-mail estiver disponível
         if email:
             try:
                 # Usar a função enviar_email_orcamento_pdf com todos os dados do orçamento
                 app.logger.info(f"Enviando e-mail para {email}")
                 
-                # Modificar a função enviar_email_orcamento_pdf para aceitar BytesIO em vez de caminho de arquivo
-                from services.email_sender import enviar_email_orcamento_pdf_buffer
+                # Verificar se as credenciais de e-mail estão configuradas
+                email_remetente = os.environ.get('EMAIL_REMETENTE')
+                email_senha = os.environ.get('EMAIL_SENHA')
                 
-                # Tentar usar a nova função se existir, caso contrário, salvar temporariamente o arquivo
-                try:
-                    sucesso, mensagem = enviar_email_orcamento_pdf_buffer(
-                        email, 
-                        pdf_buffer, 
-                        filename,
-                        numero_orcamento, 
-                        empresa_cliente,
-                        servicos=servicos,
-                        subtotal=subtotal_orcamento,
-                        valor_sesi=valor_sesi,
-                        total=total_orcamento,
-                        percentual_sesi=percentual_sesi
-                    )
-                except (ImportError, AttributeError):
-                    # Fallback: salvar temporariamente o arquivo
-                    import tempfile
-                    import os
-                    
-                    # Criar diretório temporário se não existir
-                    temp_dir = os.path.join(tempfile.gettempdir(), 'orcamentos_pdf')
-                    os.makedirs(temp_dir, exist_ok=True)
-                    
-                    # Salvar o PDF temporariamente
-                    temp_pdf_path = os.path.join(temp_dir, filename)
-                    with open(temp_pdf_path, 'wb') as f:
-                        f.write(pdf_buffer.getvalue())
-                    
-                    # Usar a função existente com o caminho do arquivo
-                    from services.email_sender import enviar_email_orcamento_pdf
-                    sucesso, mensagem = enviar_email_orcamento_pdf(
-                        email, 
-                        temp_pdf_path, 
-                        numero_orcamento, 
-                        empresa_cliente,
-                        servicos=servicos,
-                        subtotal=subtotal_orcamento,
-                        valor_sesi=valor_sesi,
-                        total=total_orcamento,
-                        percentual_sesi=percentual_sesi
-                    )
-                    
-                    # Remover o arquivo temporário após o envio
-                    try:
-                        os.remove(temp_pdf_path)
-                    except:
-                        pass
-                
-                if sucesso:
-                    app.logger.info(f"E-mail enviado para {email} com o orçamento {numero_orcamento}")
-                    # Salvar na sessão que o e-mail foi enviado com sucesso
-                    session['email_enviado'] = True
-                else:
-                    app.logger.error(f"Erro ao enviar e-mail: {mensagem}")
+                if not email_remetente or not email_senha:
+                    app.logger.error("Credenciais de e-mail não configuradas")
                     session['email_enviado'] = False
-                    session['erro_email'] = mensagem
+                    session['erro_email'] = "Credenciais de e-mail não configuradas"
+                else:
+                    # Modificar a função enviar_email_orcamento_pdf para aceitar BytesIO em vez de caminho de arquivo
+                    try:
+                        from services.email_sender import enviar_email_orcamento_pdf_buffer
+                        
+                        # Tentar usar a nova função se existir
+                        sucesso, mensagem = enviar_email_orcamento_pdf_buffer(
+                            email, 
+                            pdf_buffer, 
+                            filename,
+                            numero_orcamento, 
+                            empresa_cliente,
+                            servicos=servicos,
+                            subtotal=subtotal_orcamento,
+                            valor_sesi=valor_sesi,
+                            total=total_orcamento,
+                            percentual_sesi=percentual_sesi
+                        )
+                    except (ImportError, AttributeError):
+                        # Fallback: salvar temporariamente o arquivo
+                        import tempfile
+                        
+                        # Criar diretório temporário se não existir
+                        temp_dir = os.path.join(tempfile.gettempdir(), 'orcamentos_pdf')
+                        os.makedirs(temp_dir, exist_ok=True)
+                        
+                        # Salvar o PDF temporariamente
+                        temp_pdf_path = os.path.join(temp_dir, filename)
+                        with open(temp_pdf_path, 'wb') as f:
+                            f.write(pdf_buffer.getvalue())
+                        
+                        # Usar a função existente com o caminho do arquivo
+                        from services.email_sender import enviar_email_orcamento_pdf
+                        sucesso, mensagem = enviar_email_orcamento_pdf(
+                            email, 
+                            temp_pdf_path, 
+                            numero_orcamento, 
+                            empresa_cliente,
+                            servicos=servicos,
+                            subtotal=subtotal_orcamento,
+                            valor_sesi=valor_sesi,
+                            total=total_orcamento,
+                            percentual_sesi=percentual_sesi
+                        )
+                        
+                        # Remover o arquivo temporário após o envio
+                        try:
+                            os.remove(temp_pdf_path)
+                        except:
+                            pass
+                    
+                    if sucesso:
+                        app.logger.info(f"E-mail enviado para {email} com o orçamento {numero_orcamento}")
+                        # Salvar na sessão que o e-mail foi enviado com sucesso
+                        session['email_enviado'] = True
+                    else:
+                        app.logger.error(f"Erro ao enviar e-mail: {mensagem}")
+                        session['email_enviado'] = False
+                        session['erro_email'] = mensagem
             except Exception as e:
                 app.logger.error(f"Erro ao enviar e-mail: {str(e)}")
                 session['email_enviado'] = False
