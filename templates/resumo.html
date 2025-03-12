@@ -116,6 +116,14 @@
             }
         }
     </style>
+    <script>
+        function redirecionarParaConfirmacao() {
+            // Aguardar um tempo para o download iniciar e então redirecionar
+            setTimeout(function() {
+                window.location.href = "{{ url_for('confirmacao') }}";
+            }, 1500); // 1.5 segundos de espera
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -140,17 +148,61 @@
             <p><strong>Unidade:</strong> {{ servico.unidade }}</p>
             <p><strong>Região:</strong> {{ servico.regiao }}</p>
             <p><strong>Nome da Empresa:</strong> {{ empresa_cliente if empresa_cliente else 'Não informado' }}</p>
-            <p><strong>Grau de Risco:</strong> {{ servico.grau_risco if servico.grau_risco else 'Não aplicável' }}</p>
-            <p><strong>Número de Trabalhadores:</strong> {% if servico.num_trabalhadores %}{{ servico.num_trabalhadores|replace('ate', 'Até ')|replace('a', ' a ') }}{% else %}Não aplicável{% endif %}</p>
+            
+            {% if servico.grau_risco %}
+            <p><strong>Grau de Risco:</strong> {{ servico.grau_risco }}</p>
+            {% endif %}
+            
+            {% if servico.num_trabalhadores %}
+            <p><strong>Número de Trabalhadores:</strong> {{ servico.num_trabalhadores|replace('ate', 'Até ')|replace('a', ' a ') }}</p>
+            {% endif %}
+            
+            {% if servico.num_ges_ghe %}
+            <p><strong>Número de GES/GHE:</strong> {{ servico.num_ges_ghe }}</p>
+            {% endif %}
+            
+            {% if servico.multiplas_coletas %}
+            <p><strong>Coletas em dias diferentes:</strong> Sim ({{ servico.quantidade_dias }} dias)</p>
+            {% endif %}
+            
+            {% if servico.tipo_amostrador %}
+            <p><strong>Custos Laboratoriais:</strong> {{ servico.tipo_amostrador }}, {{ servico.quantidade_amostras }} amostras, 
+               análise {{ servico.tipo_analise }}, {{ "com" if servico.necessita_art else "sem" }} ART, 
+               envio {{ servico.metodo_envio }}</p>
+            {% endif %}
+            
+            {% if servico.custos_logisticos and servico.custos_logisticos > 0 %}
+            <p><strong>Custos Logísticos:</strong> R$ {{ "%.2f"|format(servico.custos_logisticos) }}</p>
+            {% endif %}
+            
+            {% if servico.custos_laboratoriais and servico.custos_laboratoriais > 0 %}
+            <p><strong>Custos Laboratoriais:</strong> R$ {{ "%.2f"|format(servico.custos_laboratoriais) }}</p>
+            {% endif %}
+            
+            {% if servico.custos_multiplos_dias and servico.custos_multiplos_dias > 0 %}
+            <p><strong>Custos de Múltiplos Dias:</strong> R$ {{ "%.2f"|format(servico.custos_multiplos_dias) }}</p>
+            {% endif %}
+            
+            <p><strong>Preço Unitário:</strong> {{ servico.preco_unitario_formatado if servico.preco_unitario_formatado else "R$ %.2f"|format(servico.preco_unitario) }}</p>
+            <p><strong>Preço Total:</strong> {{ servico.preco_total_formatado if servico.preco_total_formatado else "R$ %.2f"|format(servico.preco_total) }}</p>
         </div>
         {% endfor %}
         
-        <form method="post" action="{{ url_for('gerar_orcamento') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF corrigido -->
+        <div class="resumo-total">
+            <p><strong>Subtotal:</strong> {{ subtotal }}</p>
+            <p><strong>Percentual Indireto SESI ({{ percentual_sesi|default(15) }}%):</strong> {{ valor_sesi }}</p>
+            <p><strong>Total do Orçamento:</strong> {{ total }}</p>
+            {% if numero_orcamento %}
+            <p><strong>Número do Orçamento:</strong> {{ numero_orcamento }}</p>
+            {% endif %}
+        </div>
+        
+        <form id="orcamentoForm" method="post" action="{{ url_for('gerar_orcamento') }}" target="_blank">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="dados" value="{{ servicos|tojson }}">
             <div class="buttons">
                 <button type="button" onclick="history.back()">Voltar e Editar</button>
-                <button type="submit">Confirmar e Gerar Orçamento</button>
+                <button type="submit" onclick="redirecionarParaConfirmacao()">Confirmar e Gerar Orçamento</button>
             </div>
         </form>
     </div>

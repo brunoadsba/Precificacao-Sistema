@@ -112,8 +112,10 @@
                 <tr>
                     <th>Serviço</th>
                     <th>Empresa</th>
+                    <th>Detalhes</th>
                     <th>Quantidade</th>
                     <th>Valor Unitário</th>
+                    <th>Custos Adicionais</th>
                     <th>Valor Total</th>
                 </tr>
             </thead>
@@ -122,8 +124,22 @@
                 <tr>
                     <td>{{ servico.nome }}</td>
                     <td>{{ servico.empresa }}</td>
+                    <td>{{ servico.detalhes }}</td>
                     <td>{{ servico.quantidade }} {{ servico.unidade }}</td>
                     <td>{{ servico.preco_unitario_formatado }}</td>
+                    <td>
+                        {% if servico.custos_logisticos and servico.custos_logisticos > 0 %}
+                        <div>Logística: R$ {{ "%.2f"|format(servico.custos_logisticos) }}</div>
+                        {% endif %}
+                        
+                        {% if servico.custos_laboratoriais and servico.custos_laboratoriais > 0 %}
+                        <div>Laboratório: R$ {{ "%.2f"|format(servico.custos_laboratoriais) }}</div>
+                        {% endif %}
+                        
+                        {% if servico.custos_multiplos_dias and servico.custos_multiplos_dias > 0 %}
+                        <div>Múltiplos dias: R$ {{ "%.2f"|format(servico.custos_multiplos_dias) }}</div>
+                        {% endif %}
+                    </td>
                     <td>{{ servico.preco_total_formatado }}</td>
                 </tr>
                 {% endfor %}
@@ -131,6 +147,8 @@
         </table>
         
         <div class="orcamento-total">
+            <p>Subtotal: {{ subtotal_orcamento }}</p>
+            <p>Percentual Indireto SESI ({{ percentual_sesi }}%): {{ valor_sesi }}</p>
             <p>Total: {{ total_orcamento }}</p>
         </div>
         
@@ -143,7 +161,7 @@
             <a href="{{ url_for('formulario') }}" class="btn">Novo Orçamento</a>
             {% if cliente_email %}
             <form method="POST" action="{{ url_for('enviar_orcamento') }}" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- Token CSRF corrigido -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-success">Enviar por E-mail</button>
             </form>
             {% endif %}

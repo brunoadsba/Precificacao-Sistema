@@ -1,10 +1,10 @@
 Serviço,Tipo_Avaliacao,Adicional_GES_GHE,Região,Preço
-"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Instituto",352.00
-"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Central",300.00
-"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Norte",300.00
-"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Oeste",300.00
-"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Sudoeste",300.00
-"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",0.00,"Sul e Extremo Sul",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",50.00,"Instituto",352.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",50.00,"Central",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",50.00,"Norte",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",50.00,"Oeste",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",50.00,"Sudoeste",300.00
+"Coleta para Avaliação Ambiental","Pacote (1 a 4 avaliações)",50.00,"Sul e Extremo Sul",300.00
 "Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Instituto",88.00
 "Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Central",75.00
 "Coleta para Avaliação Ambiental","Por Avaliação Adicional",0.00,"Norte",70.00

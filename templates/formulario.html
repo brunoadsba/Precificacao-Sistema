@@ -4,7 +4,20 @@
 <div class="container mt-5">
     <h1 class="mb-4 text-center text-white" style="background-color: #1a202c; padding: 20px; border-radius: 8px;">Formulário de Orçamento</h1>
     
-    <form id="orcamentoForm" method="POST" action="{{ url_for('processar_formulario') }}">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul class="mb-0">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <form id="orcamentoForm" method="POST" action="{{ url_for('processar_formulario') }}" onkeypress="return event.keyCode != 13;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         
         <div class="card mb-4" style="background-color: #1a202c; border: none;">
@@ -13,12 +26,18 @@
             </div>
             <div class="card-body" style="background-color: #1a202c;">
                 <div class="mb-3">
-                    <label for="empresa" class="form-label text-white">Empresa:</label>
+                    <label for="empresa" class="form-label text-white">Empresa: <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="empresa" name="empresa" required>
+                    <div class="invalid-feedback">
+                        O campo Empresa é obrigatório.
+                    </div>
                 </div>
                 <div class="mb-3">
-                    <label for="cliente_email" class="form-label text-white">E-mail:</label>
+                    <label for="cliente_email" class="form-label text-white">E-mail: <span class="text-danger">*</span></label>
                     <input type="email" class="form-control" id="cliente_email" name="cliente_email" required>
+                    <div class="invalid-feedback">
+                        Por favor, forneça um endereço de e-mail válido.
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="telefone" class="form-label text-white">Telefone:</label>
@@ -29,36 +48,36 @@
 
         <div id="servicos-container">
             <!-- Aqui serão adicionados os serviços -->
-            <div class="card mb-4 servico-card" style="background-color: #1a202c; border: none;">
+            <div id="servico-card-1" class="card mb-4 servico-card" style="background-color: #1a202c; border: none;">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">Serviço (1):</h3>
+                    <button type="button" class="btn btn-danger" onclick="removerServico(1)" style="display: none;">Remover</button>
                 </div>
                 <div class="card-body" style="background-color: #1a202c;">
                     <!-- Etapa 1: Seleção do Serviço -->
                     <div class="mb-3">
-                        <label for="servico-1-nome" class="form-label text-white">Selecione um serviço:</label>
+                        <label for="servico-1-nome" class="form-label text-white">Serviço:</label>
                         <select class="form-select servico-select" id="servico-1-nome" name="servicos[0][nome]" required onchange="mostrarCamposAdicionais(1); atualizarPreco(1)">
                             <option value="">Selecione um serviço</option>
                             {% for servico in servicos %}
                             <option value="{{ servico }}">{{ servico }}</option>
                             {% endfor %}
                         </select>
+                        <small class="form-text text-light">Selecione o tipo de serviço a ser incluído no orçamento.</small>
                     </div>
                     
                     <!-- Etapa 2: Parâmetros Específicos para PGR -->
                     <div id="parametros-pgr-1" class="parametros-pgr" style="display: none;">
-                        <div class="mb-3">
-                            <label class="form-label text-white">Grau de Risco:</label>
-                            <div class="radio-group">
-                                <input type="radio" class="btn-check grau-risco" name="servicos[0][grau_risco]" id="grauRisco1e2-1" value="1 e 2" checked onchange="atualizarPreco(1)">
-                                <label class="btn btn-radio" for="grauRisco1e2-1">1 e 2</label>
-                                
-                                <input type="radio" class="btn-check grau-risco" name="servicos[0][grau_risco]" id="grauRisco3e4-1" value="3 e 4" onchange="atualizarPreco(1)">
-                                <label class="btn btn-radio" for="grauRisco3e4-1">3 e 4</label>
-                            </div>
+                        <div class="mb-3 campo-adicional campo-pgr" id="grau-risco-container-1" style="display: none;">
+                            <label for="grau-risco-1" class="form-label text-white">Grau de Risco:</label>
+                            <select class="form-select" id="grau-risco-1" name="servicos[0][grau_risco]" onchange="atualizarPreco(1)">
+                                <option value="1e2">1 e 2</option>
+                                <option value="3e4">3 e 4</option>
+                            </select>
+                            <small class="form-text text-light">Selecione o grau de risco da empresa conforme NR-4.</small>
                         </div>
                         
-                        <div class="mb-3">
+                        <div class="mb-3 campo-adicional campo-pgr" id="num-trabalhadores-container-1" style="display: none;">
                             <label for="numTrabalhadores-1" class="form-label text-white">Número de Trabalhadores:</label>
                             <select class="form-select num-trabalhadores" id="numTrabalhadores-1" name="servicos[0][num_trabalhadores]" onchange="atualizarPreco(1)">
                                 <option value="">Selecione a faixa</option>
@@ -79,65 +98,92 @@
                                 <option value="701a750">701 a 750 Trabalhadores</option>
                                 <option value="751a800">751 a 800 Trabalhadores</option>
                             </select>
+                            <small class="form-text text-light">Selecione a faixa de quantidade de trabalhadores da empresa.</small>
                         </div>
                     </div>
                     
-                    <!-- Campos comuns para todos os serviços -->
+                    <!-- Etapa 2: Seleção da Região -->
                     <div class="mb-3">
                         <label for="regiao-1" class="form-label text-white">Região:</label>
                         <select class="form-select regiao-select" id="regiao-1" name="servicos[0][regiao]" required onchange="atualizarPreco(1)">
                             <option value="">Selecione a região</option>
-                            <option value="Instituto">Instituto</option>
-                            <option value="Central">Central</option>
-                            <option value="Norte">Norte</option>
-                            <option value="Oeste">Oeste</option>
-                            <option value="Sudoeste">Sudoeste</option>
-                            <option value="Sul">Sul</option>
-                            <option value="Extremo Sul">Extremo Sul</option>
+                            <!-- As opções serão carregadas dinamicamente via JavaScript -->
                         </select>
+                        <small class="form-text text-light">Selecione a região onde o serviço será realizado.</small>
                     </div>
 
                     <!-- Novo campo para Variável -->
-                    <div class="mb-3">
-                        <label for="variavel-1" class="form-label text-white">Selecione a Variável:</label>
-                        <select class="form-select variavel-select" id="variavel-1" name="servicos[0][variavel]" onchange="atualizarPreco(1)">
+                    <div class="mb-3 campo-adicional campo-variavel" id="variavel-container-1" style="display: none;">
+                        <label for="variavel-1" class="form-label text-white">Variável:</label>
+                        <select class="form-select variavel-select" id="variavel-1" name="servicos[0][variavel]" onchange="mostrarCamposAdicionais(1); atualizarPreco(1)">
                             <option value="">Selecione uma variável</option>
-                            {% if variaveis_disponiveis.get(servico) %}
-                                {% for variavel in variaveis_disponiveis.get(servico, []) %}
-                                    <option value="{{ variavel }}">{{ variavel }}</option>
-                                {% endfor %}
-                            {% else %}
-                                <option value="">Nenhuma variável disponível</option>
-                            {% endif %}
+                            <!-- As opções serão carregadas dinamicamente via JavaScript -->
                         </select>
+                        <small class="form-text text-light">Selecione a variável específica para este tipo de serviço.</small>
                     </div>
 
                     <!-- Após o campo de variável -->
-                    <div class="mb-3" id="avaliacao-adicional-container-1" style="display: none;">
-                        <label for="avaliacao-adicional-1" class="form-label text-white">Deseja adicionar Avaliação Adicional?</label>
+                    <div class="mb-3 campo-adicional campo-avaliacao" id="avaliacao-adicional-container-1" style="display: none;">
+                        <label for="avaliacao-adicional-1" class="form-label text-white">Avaliação Adicional:</label>
                         <select class="form-select" id="avaliacao-adicional-1" name="servicos[0][avaliacao_adicional]" onchange="toggleQuantidadeAvaliacoes(1)">
                             <option value="nao">Não</option>
                             <option value="sim">Sim</option>
                         </select>
+                        <small class="form-text text-light">Indique se serão necessárias avaliações adicionais.</small>
                     </div>
 
                     <div class="mb-3" id="quantidade-avaliacoes-container-1" style="display: none;">
                         <label for="quantidade-avaliacoes-1" class="form-label text-white">Quantidade de Avaliações Adicionais:</label>
-                        <input type="number" class="form-control" id="quantidade-avaliacoes-1" name="servicos[0][quantidade_avaliacoes]" value="1" min="1" max="10" onchange="atualizarPreco(1)">
-                        <small class="form-text text-muted text-white">Máximo de 10 avaliações adicionais</small>
+                        <input type="number" class="form-control" id="quantidade-avaliacoes-1" name="servicos[0][quantidade_avaliacoes]" value="1" min="1" max="10" onchange="atualizarPreco(1)" onkeyup="atualizarPreco(1)">
+                        <small class="form-text text-light">Informe quantas avaliações adicionais serão necessárias.</small>
                     </div>
 
-                    <div class="mb-3 ges-ghe-container" id="ges-ghe-container-1" style="display: none;">
-                        <label for="num-ges-ghe-1" class="form-label text-white">Número de GES/GHE:</label>
-                        <input type="number" class="form-control num-ges-ghe" id="num-ges-ghe-1" name="servicos[0][num_ges_ghe]" value="1" min="1" onchange="atualizarPreco(1)">
-                        <small class="form-text text-muted text-white">Grupos de Exposição Similar/Grupos Homogêneos de Exposição</small>
+                    <div class="mb-3 campo-adicional campo-ges" id="ges-container-1" style="display: none;">
+                        <label for="ges-1" class="form-label text-white">Número de GES/GHE:</label>
+                        <input type="number" class="form-control" id="ges-1" name="servicos[0][ges]" value="1" min="1" onchange="atualizarPreco(1)">
+                        <small class="form-text text-light">Informe o número de Grupos de Exposição Similar/Grupos Homogêneos de Exposição.</small>
+                    </div>
+
+                    <!-- Após o campo de variável e antes do campo de quantidade -->
+                    <div class="mb-3 campo-adicional campo-coleta" id="multiplas-coletas-container-1" style="display: none;">
+                        <label for="multiplas-coletas-1" class="form-label text-white">Coletas em dias diferentes:</label>
+                        <select class="form-select" id="multiplas-coletas-1" name="servicos[0][multiplas_coletas]" onchange="toggleDiasColeta(1)">
+                            <option value="nao">Não</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                        <small class="form-text text-light">Indique se as coletas serão realizadas em dias diferentes.</small>
+                    </div>
+
+                    <div class="mb-3 campo-adicional" id="dias-coleta-container-1" style="display: none;">
+                        <label class="form-label text-white">Quantidade de dias de coleta:</label>
+                        <input type="number" class="form-control" id="quantidade-dias-1" name="servicos[0][quantidade_dias]" value="1" min="1" max="30" onchange="atualizarDiasColeta(1)">
+                        <small class="form-text text-light">Informe em quantos dias diferentes serão realizadas as coletas.</small>
+                        
+                        <!-- Container para os detalhes dos dias de coleta -->
+                        <div id="detalhes-dias-coleta-1" class="mt-3">
+                            <!-- Aqui serão adicionados os campos para cada dia de coleta -->
+                        </div>
+                        
+                        <!-- Campo oculto para armazenar os custos de múltiplos dias -->
+                        <input type="hidden" id="custos-multiplos-dias-1" name="servicos[0][custos_multiplos_dias]" value="0">
                     </div>
 
                     <div class="mb-3">
                         <label for="quantidade-1" class="form-label text-white">Quantidade:</label>
                         <input type="number" class="form-control quantidade-input" id="quantidade-1" name="servicos[0][quantidade]" value="1" min="1" onchange="atualizarPrecoTotal(1)">
+                        <small class="form-text text-light">Adicione a quantidade de vezes que o serviço será executado.</small>
                     </div>
                     
+                    <!-- Após os campos de região -->
+                    <div class="mb-3">
+                        <label for="custos-logisticos-1" class="form-label text-white">Custos Logísticos:</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="custos-logisticos-1" name="servicos[0][custos_logisticos]" value="0.00" min="0" step="0.01" onchange="atualizarPrecoTotal(1)">
+                        </div>
+                        <small class="form-text text-light">Adicione custos de deslocamento, pedágios, etc.</small>
+                    </div>
+
                     <!-- Etapa 3: Visualização do Preço -->
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -159,16 +205,77 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Após os campos de GES/GHE -->
+                    <div class="mb-3 campo-adicional campo-laboratorial" id="custos-laboratoriais-container-1" style="display: none;">
+                        <h5 class="text-white">Custos Laboratoriais</h5>
+                        
+                        <div class="mb-3">
+                            <label for="tipo-amostrador-1" class="form-label text-white">Tipo de Amostrador:</label>
+                            <select class="form-select" id="tipo-amostrador-1" name="servicos[0][tipo_amostrador]" onchange="calcularCustosLaboratoriais(1)">
+                                <option value="">Selecione o tipo de amostrador</option>
+                                <option value="bomba">Bomba de Amostragem</option>
+                                <option value="dosimetro">Dosímetro</option>
+                                <option value="cassete">Cassete</option>
+                                <option value="impinger">Impinger</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                            <small class="form-text text-light">Selecione o tipo de equipamento utilizado para coleta de amostras.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="quantidade-amostras-1" class="form-label text-white">Quantidade de Amostras:</label>
+                            <input type="number" class="form-control" id="quantidade-amostras-1" name="servicos[0][quantidade_amostras]" value="1" min="1" onchange="calcularCustosLaboratoriais(1)">
+                            <small class="form-text text-light">Informe o número de amostras que serão coletadas.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tipo-analise-1" class="form-label text-white">Tipo de Análise:</label>
+                            <select class="form-select" id="tipo-analise-1" name="servicos[0][tipo_analise]" onchange="calcularCustosLaboratoriais(1)">
+                                <option value="">Selecione o tipo de análise</option>
+                                <option value="quimica">Química</option>
+                                <option value="biologica">Biológica</option>
+                                <option value="fisica">Física</option>
+                            </select>
+                            <small class="form-text text-light">Selecione o tipo de análise laboratorial a ser realizada.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="necessita-art-1" class="form-label text-white">Necessita ART:</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="necessita-art-1" name="servicos[0][necessita_art]" onchange="calcularCustosLaboratoriais(1)">
+                                <label class="form-check-label text-white" for="necessita-art-1">Sim</label>
+                            </div>
+                            <small class="form-text text-light">Indique se é necessária Anotação de Responsabilidade Técnica.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="metodo-envio-1" class="form-label text-white">Método de Envio:</label>
+                            <select class="form-select" id="metodo-envio-1" name="servicos[0][metodo_envio]" onchange="calcularCustosLaboratoriais(1)">
+                                <option value="padrao">Padrão</option>
+                                <option value="expresso">Expresso</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                            <small class="form-text text-light">Selecione o método de envio das amostras para o laboratório.</small>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <label for="custos-laboratoriais-valor-1" class="form-label text-white">Custos Laboratoriais Calculados:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="text" class="form-control" id="custos-laboratoriais-1" name="servicos[0][custos_laboratoriais]" value="0.00" readonly>
+                            </div>
+                            <small class="form-text text-muted text-white">Valor calculado com base nos parâmetros acima.</small>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
         
         <div class="d-flex justify-content-between mb-4">
-            <button type="button" class="btn btn-success" id="adicionarServico">
+            <button type="button" class="btn btn-success" id="adicionarServico" onclick="adicionarServico()">
                 <i class="bi bi-plus-circle"></i> Adicionar Serviço
-            </button>
-            <button type="button" class="btn btn-danger" id="removerServico" style="display: none;">
-                <i class="bi bi-trash"></i> Remover Último Serviço
             </button>
         </div>
         
@@ -177,18 +284,115 @@
                 <h3 class="mb-0">Total do Orçamento</h3>
             </div>
             <div class="card-body" style="background-color: #1a202c;">
-                <h2 class="text-end text-white" id="totalOrcamento">R$ 0,00</h2>
+                <div class="row">
+                    <div class="col-md-8 text-white">Subtotal:</div>
+                    <div class="col-md-4 text-end text-white" id="subtotalOrcamento">R$ 0,00</div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-8 text-white">Percentual Indireto SESI (30%):</div>
+                    <div class="col-md-4 text-end text-white" id="valorSESI">R$ 0,00</div>
+                </div>
+                <hr class="border-light">
+                <div class="row">
+                    <div class="col-md-8 text-white"><strong>Total:</strong></div>
+                    <div class="col-md-4 text-end text-white"><h2 id="totalOrcamento">R$ 0,00</h2></div>
+                </div>
                 <input type="hidden" id="totalOrcamentoHidden" name="total_orcamento" value="0">
             </div>
         </div>
         
         <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary btn-lg">Gerar Orçamento</button>
+            <button type="button" class="btn btn-primary btn-lg" onclick="validarEEnviarFormulario()">Gerar Orçamento</button>
         </div>
     </form>
 </div>
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+    function validarEEnviarFormulario() {
+        // Verificar campos obrigatórios do cliente
+        const empresa = document.getElementById('empresa').value.trim();
+        const email = document.getElementById('cliente_email').value.trim();
+        
+        let erros = [];
+        
+        if (!empresa) {
+            erros.push('O campo Empresa é obrigatório.');
+            document.getElementById('empresa').classList.add('is-invalid');
+        } else {
+            document.getElementById('empresa').classList.remove('is-invalid');
+        }
+        
+        if (!email) {
+            erros.push('O campo E-mail é obrigatório.');
+            document.getElementById('cliente_email').classList.add('is-invalid');
+        } else if (!email.includes('@')) {
+            erros.push('O E-mail fornecido não é válido.');
+            document.getElementById('cliente_email').classList.add('is-invalid');
+        } else {
+            document.getElementById('cliente_email').classList.remove('is-invalid');
+        }
+        
+        // Verificar se há pelo menos um serviço
+        const servicos = document.querySelectorAll('.servico-card');
+        if (servicos.length === 0) {
+            erros.push('Adicione pelo menos um serviço ao orçamento.');
+        }
+        
+        // Verificar se todos os serviços têm um serviço selecionado
+        let servicosValidos = true;
+        servicos.forEach(servico => {
+            const servicoSelect = servico.querySelector('select[name$="[nome]"]');
+            if (!servicoSelect || !servicoSelect.value) {
+                servicosValidos = false;
+                if (servicoSelect) {
+                    servicoSelect.classList.add('is-invalid');
+                }
+            } else if (servicoSelect) {
+                servicoSelect.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!servicosValidos) {
+            erros.push('Todos os serviços devem ter um serviço selecionado.');
+        }
+        
+        // Exibir erros, se houver
+        if (erros.length > 0) {
+            alert(erros.join('\n'));
+            return;
+        }
+        
+        // Se tudo estiver válido, enviar o formulário
+        document.getElementById('orcamentoForm').submit();
+    }
+    
+    // Adicionar validação em tempo real para os campos obrigatórios
+    document.addEventListener('DOMContentLoaded', function() {
+        const empresa = document.getElementById('empresa');
+        const email = document.getElementById('cliente_email');
+        
+        empresa.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        email.addEventListener('blur', function() {
+            const emailValue = this.value.trim();
+            if (!emailValue) {
+                this.classList.add('is-invalid');
+            } else if (!emailValue.includes('@')) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+</script>
 {% endblock %}
 
 {% block scripts %}
