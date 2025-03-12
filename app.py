@@ -19,6 +19,7 @@ load_dotenv()
 # Inicialização do aplicativo Flask
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config['SESSION_TYPE'] = 'filesystem'  # ou outro tipo de sessão que você está usando
 csrf = CSRFProtect(app)
 
 # Adicionar suporte a CORS
