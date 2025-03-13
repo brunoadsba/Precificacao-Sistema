@@ -11,7 +11,6 @@ from services.email_sender import init_mail, enviar_email_orcamento, enviar_emai
 from babel.numbers import format_currency
 import json
 import logging
-from flask_session import Session  # Importar Flask-Session
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -19,8 +18,7 @@ load_dotenv()
 # Inicialização do aplicativo Flask
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config['SESSION_TYPE'] = 'filesystem'  # ou outro tipo de sessão que você está usando
-csrf = CSRFProtect(app)
+csrf = CSRFProtect(app)  # Adicione esta linha
 
 # Adicionar suporte a CORS
 @app.after_request
@@ -29,13 +27,6 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
     response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
     return response
-
-# Configurar sessão com Flask-Session
-Session(app)
-
-# Criar diretório para sessões se não existir
-if not os.path.exists(app.config['SESSION_FILE_DIR']):
-    os.makedirs(app.config['SESSION_FILE_DIR'])
 
 # Configurar logging
 logging.basicConfig(filename='app.log', level=logging.INFO)
@@ -522,54 +513,13 @@ def formulario():
 
 def gerar_numero_orcamento():
     """
-    Gera um número de orçamento baseado na data atual e um contador sequencial.
-    Formato: DD-MM-AAAA-XXXX (onde XXXX é um número sequencial)
+    Gera um número de orçamento baseado na data e hora atual
     """
     from datetime import datetime
-    import os
-    import json
-    
-    # Obter a data atual
-    data_atual = datetime.now()
-    data_formatada = data_atual.strftime("%d-%m-%Y")
-    
-    # Caminho para o arquivo de contagem
-    contador_path = os.path.join(app.config['SESSION_FILE_DIR'], 'contador_orcamento.json')
-    
-    # Verificar se o arquivo existe e carregar o contador
-    contador = 1
-    data_anterior = ""
-    
-    if os.path.exists(contador_path):
-        try:
-            with open(contador_path, 'r') as f:
-                dados = json.load(f)
-                data_anterior = dados.get('data', '')
-                contador = dados.get('contador', 1)
-                
-                # Se a data mudou, reiniciar o contador
-                if data_anterior != data_formatada:
-                    contador = 1
-                else:
-                    contador += 1
-        except:
-            # Em caso de erro, usar valores padrão
-            contador = 1
-    
-    # Salvar o novo contador
-    try:
-        with open(contador_path, 'w') as f:
-            json.dump({
-                'data': data_formatada,
-                'contador': contador
-            }, f)
-    except:
-        app.logger.error("Erro ao salvar contador de orçamento")
-    
-    # Formatar o número do orçamento: DD-MM-AAAA-XXXX
-    numero_orcamento = f"{data_formatada}-{contador:04d}"
-    
-    return numero_orcamento
+    # Formato: ANO + MES + DIA + HORA + MINUTO + SEGUNDO
+    agora = datetime.now()
+    numero = agora.strftime("%Y%m%d%H%M%S")
+    return f"ORC{numero}"
 
 @app.route('/resumo')
 @app.route('/resumo_view')
