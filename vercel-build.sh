@@ -1,29 +1,18 @@
 #!/bin/bash
 
-# Script de build para o Vercel
+# Script de build específico para o Vercel
 
-echo "Iniciando script de build..."
+echo "Iniciando script de build para o Vercel..."
 echo "Diretório atual: $(pwd)"
 echo "Conteúdo do diretório: $(ls -la)"
 
-# Instalar dependências
-echo "Instalando dependências..."
-pip install -r vercel-requirements.txt
+# Instalar dependências diretamente
+echo "Instalando dependências diretamente..."
+pip install Flask==2.3.3 Werkzeug==2.3.7 Flask-WTF==1.2.0 pandas==2.2.0 python-dotenv==1.0.0 Babel==2.8.0 reportlab==4.3.1 waitress==2.1.2 email-validator==2.0.0.post2 Flask-Mail==0.9.1 cachelib==0.13.0
 
-# Verificar se Flask-Session foi instalado
-echo "Verificando se Flask-Session foi instalado..."
-if pip show flask-session; then
-    echo "Flask-Session está instalado"
-else
-    echo "Flask-Session NÃO está instalado, tentando instalar novamente..."
-    pip install Flask-Session==0.8.0
-    
-    if pip show flask-session; then
-        echo "Flask-Session instalado com sucesso na segunda tentativa"
-    else
-        echo "AVISO: Flask-Session ainda não está instalado, mas continuaremos mesmo assim"
-    fi
-fi
+# Tentar instalar Flask-Session
+echo "Tentando instalar Flask-Session..."
+pip install Flask-Session==0.8.0
 
 # Criar diretório de sessão
 echo "Criando diretório de sessão..."
@@ -68,5 +57,21 @@ try:
 except ImportError as e:
     print(f'Erro ao importar flask_session: {e}')
 "
+
+# Criar um arquivo requirements.txt simplificado para o Vercel
+echo "Criando requirements.txt simplificado..."
+cat > requirements.txt << EOL
+Flask==2.3.3
+Werkzeug==2.3.7
+Flask-WTF==1.2.0
+pandas==2.2.0
+python-dotenv==1.0.0
+Babel==2.8.0
+reportlab==4.3.1
+waitress==2.1.2
+email-validator==2.0.0.post2
+Flask-Mail==0.9.1
+cachelib==0.13.0
+EOL
 
 echo "Build concluído com sucesso!" 

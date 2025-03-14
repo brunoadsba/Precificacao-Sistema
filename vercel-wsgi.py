@@ -1,8 +1,6 @@
 import os
-import pandas as pd
 import logging
 import sys
-import pkg_resources
 import traceback
 
 # Configurar logging
@@ -49,15 +47,6 @@ def verificar_ambiente():
         except Exception as e:
             logger.error(f"Erro ao criar arquivo Ambientais: {str(e)}")
     
-    # Verificar dependências instaladas
-    try:
-        installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
-        logger.info(f"Flask versão: {installed_packages.get('flask', 'não instalado')}")
-        logger.info(f"Flask-Session versão: {installed_packages.get('flask-session', 'não instalado')}")
-        logger.info(f"Pandas versão: {installed_packages.get('pandas', 'não instalado')}")
-    except Exception as e:
-        logger.error(f"Erro ao verificar dependências: {str(e)}")
-    
     # Verificar variáveis de ambiente
     logger.info(f"FLASK_ENV: {os.environ.get('FLASK_ENV', 'não definido')}")
     logger.info(f"VERCEL_DEPLOYMENT: {os.environ.get('VERCEL_DEPLOYMENT', 'não definido')}")
@@ -84,12 +73,20 @@ try:
     try:
         import flask_session
         logger.info("Flask-Session está disponível")
+        # Importar a aplicação completa
+        try:
+            from app import app
+            logger.info("Aplicação completa importada com sucesso")
+        except ImportError as e:
+            logger.error(f"Erro ao importar aplicação completa: {str(e)}")
+            # Importar a aplicação simplificada
+            from vercel_app import app
+            logger.info("Aplicação simplificada importada com sucesso")
     except ImportError:
-        logger.warning("Flask-Session não está disponível, continuando sem ele")
-    
-    # Agora importamos a aplicação
-    from app import app
-    logger.info("Aplicação importada com sucesso")
+        logger.warning("Flask-Session não está disponível, usando aplicação simplificada")
+        # Importar a aplicação simplificada
+        from vercel_app import app
+        logger.info("Aplicação simplificada importada com sucesso")
     
 except Exception as e:
     logger.error(f"Erro ao inicializar a aplicação: {str(e)}")

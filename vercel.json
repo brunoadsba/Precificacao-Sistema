@@ -2,28 +2,30 @@
     "version": 2,
     "builds": [
       {
-        "src": "wsgi.py",
+        "src": "vercel-wsgi.py",
         "use": "@vercel/python",
         "config": {
           "runtime": "python3.9",
-          "installCommand": "bash ./build.sh"
+          "installCommand": "bash ./vercel-build.sh",
+          "maxLambdaSize": "15mb"
         }
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/wsgi.py"
+        "dest": "/vercel-wsgi.py"
       }
     ],
     "env": {
       "FLASK_ENV": "production",
-      "FLASK_APP": "app.py",
+      "FLASK_APP": "vercel_app.py",
       "PYTHONUNBUFFERED": "1",
-      "VERCEL_DEPLOYMENT": "1"
+      "VERCEL_DEPLOYMENT": "1",
+      "SESSION_TYPE": "filesystem"
     },
     "functions": {
-      "wsgi.py": {
+      "vercel-wsgi.py": {
         "memory": 1536,
         "maxDuration": 120
       }

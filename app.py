@@ -12,24 +12,58 @@ from babel.numbers import format_currency
 import json
 import logging
 import sys
+import traceback
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Verificar se estamos no ambiente Vercel
+is_vercel = os.getenv('VERCEL_DEPLOYMENT', '0') == '1'
+logger.info(f"Inicializando app.py no ambiente Vercel: {is_vercel}")
 
 # Tentar importar Flask-Session, mas continuar mesmo se não estiver disponível
 try:
     from flask_session import Session
     has_flask_session = True
+    logger.info("Flask-Session importado com sucesso")
 except ImportError:
     has_flask_session = False
-    logging.warning("Flask-Session não está instalado. Usando sessão padrão do Flask.")
+    logger.warning("Flask-Session não está instalado. Usando sessão padrão do Flask.")
+    traceback.print_exc()
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 
 # Inicialização do aplicativo Flask
-app = Flask(__name__)
-app.config.from_object(Config)
-
-# Inicializar CSRF Protection
-csrf = CSRFProtect(app)
+try:
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    logger.info("Aplicativo Flask inicializado com sucesso")
+    
+    # Inicializar CSRF Protection
+    csrf = CSRFProtect(app)
+    logger.info("CSRF Protection inicializado")
+    
+    # Inicializar Flask-Session apenas se estiver disponível
+    if has_flask_session:
+        try:
+            Session(app)
+            logger.info("Flask-Session inicializado com sucesso.")
+        except Exception as e:
+            logger.error(f"Erro ao inicializar Flask-Session: {str(e)}")
+            traceback.print_exc()
+    else:
+        logger.warning("Usando sessão padrão do Flask (não persistente).")
+        
+    # Inicializar Flask-Mail
+    mail_initialized = init_mail(app)
+    logger.info(f"Flask-Mail inicializado: {mail_initialized}")
+    
+except Exception as e:
+    logger.error(f"Erro ao inicializar o aplicativo Flask: {str(e)}")
+    traceback.print_exc()
+    raise
 
 # Configuração para lidar com erros CSRF
 @app.errorhandler(CSRFError)
@@ -44,13 +78,6 @@ def handle_csrf_error(e):
         return redirect(url_for('confirmacao'))
     else:
         return jsonify({'error': 'CSRF token is missing or invalid', 'details': str(e)}), 400
-
-# Inicializar Flask-Session apenas se estiver disponível
-if has_flask_session:
-    Session(app)
-    app.logger.info("Flask-Session inicializado com sucesso.")
-else:
-    app.logger.warning("Usando sessão padrão do Flask (não persistente).")
 
 # Adicionar suporte a CORS
 @app.after_request
@@ -69,9 +96,6 @@ def log_request_info():
         app.logger.info(f"Formulário contém CSRF token: {'csrf_token' in request.form}")
         app.logger.info(f"Headers: {dict(request.headers)}")
     return None
-
-# Configurar logging
-logging.basicConfig(filename='app.log', level=logging.INFO)
 
 # Caminho para o arquivo Excel usando caminhos relativos
 BASE_DIR = pathlib.Path(__file__).parent
