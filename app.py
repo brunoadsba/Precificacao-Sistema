@@ -11,8 +11,15 @@ from services.email_sender import init_mail, enviar_email_orcamento, enviar_emai
 from babel.numbers import format_currency
 import json
 import logging
-from flask_session import Session
 import sys
+
+# Tentar importar Flask-Session, mas continuar mesmo se não estiver disponível
+try:
+    from flask_session import Session
+    has_flask_session = True
+except ImportError:
+    has_flask_session = False
+    logging.warning("Flask-Session não está instalado. Usando sessão padrão do Flask.")
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -38,8 +45,12 @@ def handle_csrf_error(e):
     else:
         return jsonify({'error': 'CSRF token is missing or invalid', 'details': str(e)}), 400
 
-# Inicializar Flask-Session
-Session(app)
+# Inicializar Flask-Session apenas se estiver disponível
+if has_flask_session:
+    Session(app)
+    app.logger.info("Flask-Session inicializado com sucesso.")
+else:
+    app.logger.warning("Usando sessão padrão do Flask (não persistente).")
 
 # Adicionar suporte a CORS
 @app.after_request
@@ -2026,5 +2037,36 @@ def teste():
         })
     except Exception as e:
         app.logger.error(f"Erro na rota de teste: {str(e)}")
+        return jsonify({'erro': str(e)}), 500
+
+@app.route('/dependencias')
+def dependencias():
+    """Rota para verificar as dependências instaladas"""
+    try:
+        import pkg_resources
+        installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
+        
+        # Verificar dependências específicas
+        dependencies = {
+            'flask': installed_packages.get('flask', 'não instalado'),
+            'flask-session': installed_packages.get('flask-session', 'não instalado'),
+            'flask-wtf': installed_packages.get('flask-wtf', 'não instalado'),
+            'pandas': installed_packages.get('pandas', 'não instalado'),
+            'python-dotenv': installed_packages.get('python-dotenv', 'não instalado'),
+            'babel': installed_packages.get('babel', 'não instalado'),
+            'waitress': installed_packages.get('waitress', 'não instalado')
+        }
+        
+        # Verificar se Flask-Session está disponível
+        flask_session_available = 'sim' if has_flask_session else 'não'
+        
+        return jsonify({
+            'python_version': sys.version,
+            'dependencies': dependencies,
+            'flask_session_available': flask_session_available,
+            'all_packages': installed_packages
+        })
+    except Exception as e:
+        app.logger.error(f"Erro na rota de dependências: {str(e)}")
         return jsonify({'erro': str(e)}), 500
 

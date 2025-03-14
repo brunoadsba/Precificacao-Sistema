@@ -1,0 +1,38 @@
+# Arquivos e diretórios a serem ignorados no deploy do Vercel
+
+# Diretórios de ambiente virtual
+venv/
+env/
+.env/
+
+# Arquivos de cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Arquivos de log
+*.log
+
+# Diretórios de sessão (serão criados automaticamente)
+flask_session/
+
+# Arquivos de configuração local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Arquivos de IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Arquivos temporários
+tmp/
+temp/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db 
