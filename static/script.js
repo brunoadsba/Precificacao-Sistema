@@ -91,7 +91,14 @@ function mostrarCamposAdicionais(id) {
 async function obterOpcoesServicos() {
     console.log('Obtendo opções de serviços...');
     try {
-        const response = await fetch('/api/servicos');
+        const response = await fetch('/api/servicos', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        });
+        
         if (!response.ok) {
             throw new Error(`Erro ao obter serviços: ${response.status} ${response.statusText}`);
         }
@@ -99,7 +106,7 @@ async function obterOpcoesServicos() {
         const data = await response.json();
         console.log('Serviços obtidos:', data);
         
-        if (data.success && Array.isArray(data.servicos)) {
+        if (data.servicos && Array.isArray(data.servicos)) {
             return data.servicos;
         } else {
             console.error('Formato de resposta inválido:', data);
@@ -459,63 +466,38 @@ function carregarRegioes(id) {
         console.log(`Carregando regiões para o serviço: ${servico}`);
         
         // Fazer requisição para obter regiões disponíveis
-        fetch(`/api/regioes_disponiveis?servico=${encodeURIComponent(servico)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(`Resposta recebida para regiões: ${JSON.stringify(data)}`);
-                
-                // Limpar o dropdown
-                regiaoSelect.innerHTML = '<option value="">Selecione a região</option>';
-                
-                // Adicionar as regiões disponíveis
-                if (data.regioes && data.regioes.length > 0) {
-                    data.regioes.forEach(regiao => {
-                        const option = document.createElement('option');
-                        option.value = regiao;
-                        option.textContent = regiao;
-                        regiaoSelect.appendChild(option);
-                    });
-                    console.log(`Carregadas ${data.regioes.length} regiões para o serviço ${servico}`);
-                } else {
-                    console.log(`Nenhuma região disponível para o serviço ${servico}`);
-                    
-                    // Adicionar opções padrão se não houver regiões disponíveis
-                    const regioesDefault = ["Instituto", "Central", "Norte", "Oeste", "Sudoeste", "Sul e Extremo Sul"];
-                    regioesDefault.forEach(regiao => {
-                        const option = document.createElement('option');
-                        option.value = regiao;
-                        option.textContent = regiao;
-                        regiaoSelect.appendChild(option);
-                    });
-                    console.log("Adicionadas regiões padrão");
-                }
-                
-                // Habilitar o dropdown
-                regiaoSelect.disabled = false;
-                
-                // Adicionar evento de change para atualizar o preço quando a região for alterada
-                regiaoSelect.addEventListener('change', function() {
-                    if (servico.includes("PGR")) {
-                        // Para serviços PGR, atualizar o preço diretamente
-                        atualizarPreco(id);
-                    } else {
-                        // Para outros serviços, carregar as variáveis primeiro
-                        carregarVariaveis(id);
-                        // A função carregarVariaveis já chama atualizarPreco
-                    }
+        fetch(`/api/regioes_disponiveis?servico=${encodeURIComponent(servico)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`Resposta recebida para regiões: ${JSON.stringify(data)}`);
+            
+            // Limpar o dropdown
+            regiaoSelect.innerHTML = '<option value="">Selecione a região</option>';
+            
+            // Adicionar as regiões disponíveis
+            if (data.regioes && data.regioes.length > 0) {
+                data.regioes.forEach(regiao => {
+                    const option = document.createElement('option');
+                    option.value = regiao;
+                    option.textContent = regiao;
+                    regiaoSelect.appendChild(option);
                 });
-            })
-            .catch(error => {
-                console.error('Erro ao carregar regiões:', error);
-                regiaoSelect.innerHTML = '<option value="">Erro ao carregar regiões</option>';
-                regiaoSelect.disabled = false;
+                console.log(`Carregadas ${data.regioes.length} regiões para o serviço ${servico}`);
+            } else {
+                console.log(`Nenhuma região disponível para o serviço ${servico}`);
                 
-                // Adicionar opções padrão em caso de erro
+                // Adicionar opções padrão se não houver regiões disponíveis
                 const regioesDefault = ["Instituto", "Central", "Norte", "Oeste", "Sudoeste", "Sul e Extremo Sul"];
                 regioesDefault.forEach(regiao => {
                     const option = document.createElement('option');
@@ -523,8 +505,39 @@ function carregarRegioes(id) {
                     option.textContent = regiao;
                     regiaoSelect.appendChild(option);
                 });
-                console.log("Adicionadas regiões padrão após erro");
+                console.log("Adicionadas regiões padrão");
+            }
+            
+            // Habilitar o dropdown
+            regiaoSelect.disabled = false;
+            
+            // Adicionar evento de change para atualizar o preço quando a região for alterada
+            regiaoSelect.addEventListener('change', function() {
+                if (servico.includes("PGR")) {
+                    // Para serviços PGR, atualizar o preço diretamente
+                    atualizarPreco(id);
+                } else {
+                    // Para outros serviços, carregar as variáveis primeiro
+                    carregarVariaveis(id);
+                    // A função carregarVariaveis já chama atualizarPreco
+                }
             });
+        })
+        .catch(error => {
+            console.error('Erro ao carregar regiões:', error);
+            regiaoSelect.innerHTML = '<option value="">Erro ao carregar regiões</option>';
+            regiaoSelect.disabled = false;
+            
+            // Adicionar opções padrão em caso de erro
+            const regioesDefault = ["Instituto", "Central", "Norte", "Oeste", "Sudoeste", "Sul e Extremo Sul"];
+            regioesDefault.forEach(regiao => {
+                const option = document.createElement('option');
+                option.value = regiao;
+                option.textContent = regiao;
+                regiaoSelect.appendChild(option);
+            });
+            console.log("Adicionadas regiões padrão após erro");
+        });
     } catch (error) {
         console.error('Erro na função carregarRegioes:', error);
     }
@@ -574,56 +587,38 @@ function carregarVariaveis(id) {
         variavelSelect.innerHTML = '<option value="">Carregando...</option>';
         
         // Fazer requisição para obter variáveis disponíveis
-        fetch(`/api/variaveis_disponiveis?servico=${encodeURIComponent(servico)}&regiao=${encodeURIComponent(regiao)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(`Resposta recebida para variáveis: ${JSON.stringify(data)}`);
+        fetch(`/api/variaveis_disponiveis?servico=${encodeURIComponent(servico)}&regiao=${encodeURIComponent(regiao)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`Resposta recebida para variáveis: ${JSON.stringify(data)}`);
+            
+            // Limpar o dropdown
+            variavelSelect.innerHTML = '<option value="">Selecione uma variável</option>';
+            
+            // Adicionar as variáveis disponíveis
+            if (data.variaveis && data.variaveis.length > 0) {
+                data.variaveis.forEach(variavel => {
+                    const option = document.createElement('option');
+                    option.value = variavel;
+                    option.textContent = variavel;
+                    variavelSelect.appendChild(option);
+                });
+                console.log(`Carregadas ${data.variaveis.length} variáveis para o serviço ${servico} na região ${regiao}`);
+            } else {
+                console.log(`Nenhuma variável disponível para o serviço ${servico} na região ${regiao}`);
                 
-                // Limpar o dropdown
-                variavelSelect.innerHTML = '<option value="">Selecione uma variável</option>';
-                
-                // Adicionar as variáveis disponíveis
-                if (data.variaveis && data.variaveis.length > 0) {
-                    data.variaveis.forEach(variavel => {
-                        const option = document.createElement('option');
-                        option.value = variavel;
-                        option.textContent = variavel;
-                        variavelSelect.appendChild(option);
-                    });
-                    console.log(`Carregadas ${data.variaveis.length} variáveis para o serviço ${servico} na região ${regiao}`);
-                } else {
-                    console.log(`Nenhuma variável disponível para o serviço ${servico} na região ${regiao}`);
-                    
-                    // Adicionar opções padrão se não houver variáveis disponíveis
-                    const variaveisDefault = ["Pacote (1 a 4 avaliações)", "Por Avaliação Adicional", "Por Relatório Unitário"];
-                    variaveisDefault.forEach(variavel => {
-                        const option = document.createElement('option');
-                        option.value = variavel;
-                        option.textContent = variavel;
-                        variavelSelect.appendChild(option);
-                    });
-                    console.log("Adicionadas variáveis padrão");
-                }
-                
-                // Habilitar o dropdown
-                variavelSelect.disabled = false;
-                
-                // Atualizar o preço após carregar as variáveis
-                setTimeout(() => {
-                    atualizarPreco(id);
-                }, 100);
-            })
-            .catch(error => {
-                console.error('Erro ao carregar variáveis:', error);
-                variavelSelect.innerHTML = '<option value="">Erro ao carregar variáveis</option>';
-                variavelSelect.disabled = false;
-                
-                // Adicionar opções padrão em caso de erro
+                // Adicionar opções padrão se não houver variáveis disponíveis
                 const variaveisDefault = ["Pacote (1 a 4 avaliações)", "Por Avaliação Adicional", "Por Relatório Unitário"];
                 variaveisDefault.forEach(variavel => {
                     const option = document.createElement('option');
@@ -631,8 +626,32 @@ function carregarVariaveis(id) {
                     option.textContent = variavel;
                     variavelSelect.appendChild(option);
                 });
-                console.log("Adicionadas variáveis padrão após erro");
+                console.log("Adicionadas variáveis padrão");
+            }
+            
+            // Habilitar o dropdown
+            variavelSelect.disabled = false;
+            
+            // Atualizar o preço após carregar as variáveis
+            setTimeout(() => {
+                atualizarPreco(id);
+            }, 100);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar variáveis:', error);
+            variavelSelect.innerHTML = '<option value="">Erro ao carregar variáveis</option>';
+            variavelSelect.disabled = false;
+            
+            // Adicionar opções padrão em caso de erro
+            const variaveisDefault = ["Pacote (1 a 4 avaliações)", "Por Avaliação Adicional", "Por Relatório Unitário"];
+            variaveisDefault.forEach(variavel => {
+                const option = document.createElement('option');
+                option.value = variavel;
+                option.textContent = variavel;
+                variavelSelect.appendChild(option);
             });
+            console.log("Adicionadas variáveis padrão após erro");
+        });
     } catch (error) {
         console.error('Erro na função carregarVariaveis:', error);
     }
@@ -895,7 +914,8 @@ async function atualizarPreco(id) {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
                 }
             });
             
@@ -1315,4 +1335,8 @@ function adicionarServico() {
     
     // Rolar para o novo serviço
     servicoCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }

@@ -1,0 +1,62 @@
+from app import app
+import os
+import pandas as pd
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def verificar_ambiente():
+    """Verifica se o ambiente está configurado corretamente"""
+    logger.info("Verificando ambiente...")
+    
+    # Verificar diretório de sessão
+    session_dir = os.path.join(os.getcwd(), 'flask_session')
+    if not os.path.exists(session_dir):
+        logger.info(f"Criando diretório de sessão: {session_dir}")
+        os.makedirs(session_dir, exist_ok=True)
+    
+    # Verificar arquivos CSV
+    pgr_path = os.path.join(os.getcwd(), 'Precos_PGR.csv')
+    ambientais_path = os.path.join(os.getcwd(), 'Precos_Ambientais.csv')
+    
+    logger.info(f"PGR Path: {pgr_path}, existe: {os.path.exists(pgr_path)}")
+    logger.info(f"Ambientais Path: {ambientais_path}, existe: {os.path.exists(ambientais_path)}")
+    
+    # Criar arquivos CSV vazios se não existirem (apenas para evitar erros)
+    if not os.path.exists(pgr_path):
+        logger.warning(f"Arquivo PGR não encontrado, criando arquivo vazio: {pgr_path}")
+        try:
+            with open(pgr_path, 'w') as f:
+                f.write("Serviço,Grau_Risco,Faixa_Trab,Região,Preço\n")
+                f.write("\"Elaboração e acompanhamento do PGR\",\"1 e 2\",\"Até 19 Trab.\",\"Central\",700.00\n")
+        except Exception as e:
+            logger.error(f"Erro ao criar arquivo PGR: {str(e)}")
+    
+    if not os.path.exists(ambientais_path):
+        logger.warning(f"Arquivo Ambientais não encontrado, criando arquivo vazio: {ambientais_path}")
+        try:
+            with open(ambientais_path, 'w') as f:
+                f.write("Serviço,Tipo_Avaliacao,Adicional_GES_GHE,Região,Preço\n")
+                f.write("\"Coleta para Avaliação Ambiental\",\"Pacote (1 a 4 avaliações)\",50.00,\"Central\",300.00\n")
+        except Exception as e:
+            logger.error(f"Erro ao criar arquivo Ambientais: {str(e)}")
+    
+    return {
+        'session_dir_exists': os.path.exists(session_dir),
+        'pgr_exists': os.path.exists(pgr_path),
+        'ambientais_exists': os.path.exists(ambientais_path)
+    }
+
+if __name__ == "__main__":
+    from waitress import serve
+    
+    # Verificar ambiente
+    verificar_ambiente()
+    
+    # Obter porta do ambiente ou usar 3000 como padrão
+    port = int(os.environ.get("PORT", 3000))
+    
+    print(f"Iniciando servidor na porta {port}")
+    serve(app, host="0.0.0.0", port=port) 

@@ -12,7 +12,6 @@ from babel.numbers import format_currency
 import json
 import logging
 from flask_session import Session
-import sys
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -48,16 +47,6 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
     response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
     return response
-
-# Adicionar log de requisições para depuração
-@app.before_request
-def log_request_info():
-    """Log de informações da requisição para depuração"""
-    if request.method == 'POST':
-        app.logger.info(f"Requisição POST para {request.path}")
-        app.logger.info(f"Formulário contém CSRF token: {'csrf_token' in request.form}")
-        app.logger.info(f"Headers: {dict(request.headers)}")
-    return None
 
 # Configurar logging
 logging.basicConfig(filename='app.log', level=logging.INFO)
@@ -1741,10 +1730,6 @@ def servicos_api():
 def diagnostico():
     """Rota para diagnóstico do ambiente"""
     try:
-        # Verificar ambiente
-        from wsgi import verificar_ambiente
-        ambiente_info = verificar_ambiente()
-        
         diagnostico = {
             'ambiente': os.environ.get('FLASK_ENV', 'não definido'),
             'diretorio_atual': os.getcwd(),
@@ -1752,9 +1737,6 @@ def diagnostico():
             'flask_session_existe': os.path.exists(os.path.join(os.getcwd(), 'flask_session')),
             'precos_pgr_existe': os.path.exists(os.path.join(os.getcwd(), 'Precos_PGR.csv')),
             'precos_ambientais_existe': os.path.exists(os.path.join(os.getcwd(), 'Precos_Ambientais.csv')),
-            'ambiente_info': ambiente_info,
-            'python_version': sys.version,
-            'platform': sys.platform,
             'variaveis_env': {
                 'SECRET_KEY': os.environ.get('SECRET_KEY', 'não definido'),
                 'FLASK_ENV': os.environ.get('FLASK_ENV', 'não definido'),
@@ -1779,7 +1761,6 @@ def diagnostico():
                 df_pgr = pd.read_csv('Precos_PGR.csv')
                 diagnostico['pgr_colunas'] = list(df_pgr.columns)
                 diagnostico['pgr_num_linhas'] = len(df_pgr)
-                diagnostico['pgr_primeiras_linhas'] = df_pgr.head(2).to_dict(orient='records')
         except Exception as e:
             diagnostico['erro_leitura_pgr'] = str(e)
             
@@ -1788,17 +1769,8 @@ def diagnostico():
                 df_amb = pd.read_csv('Precos_Ambientais.csv')
                 diagnostico['ambientais_colunas'] = list(df_amb.columns)
                 diagnostico['ambientais_num_linhas'] = len(df_amb)
-                diagnostico['ambientais_primeiras_linhas'] = df_amb.head(2).to_dict(orient='records')
         except Exception as e:
             diagnostico['erro_leitura_ambientais'] = str(e)
-        
-        # Verificar se o Flask-Mail está configurado corretamente
-        try:
-            from services.email_sender import init_mail
-            mail_status = init_mail(app)
-            diagnostico['mail_status'] = mail_status
-        except Exception as e:
-            diagnostico['mail_status_error'] = str(e)
         
         return jsonify(diagnostico)
     except Exception as e:
@@ -2014,17 +1986,11 @@ def enviar_email_orcamento(email_destino, pdf_path, numero_orcamento, empresa_cl
         traceback.print_exc()
         raise
 
-@app.route('/teste')
-def teste():
-    """Rota de teste para verificar se a aplicação está funcionando corretamente"""
-    try:
-        return jsonify({
-            'status': 'ok',
-            'message': 'Aplicação funcionando corretamente',
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'environment': os.environ.get('FLASK_ENV', 'não definido')
-        })
-    except Exception as e:
-        app.logger.error(f"Erro na rota de teste: {str(e)}")
-        return jsonify({'erro': str(e)}), 500
-
+@app.before_request
+def log_request_info():
+    """Log de informações da requisição para depuração"""
+    if request.method == 'POST':
+        app.logger.info(f"Requisição POST para {request.path}")
+        app.logger.info(f"Formulário contém CSRF token: {'csrf_token' in request.form}")
+        app.logger.info(f"Headers: {dict(request.headers)}")
+    return None

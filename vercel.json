@@ -2,24 +2,26 @@
     "version": 2,
     "builds": [
       {
-        "src": "app.py",
+        "src": "wsgi.py",
         "use": "@vercel/python"
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/app.py"
+        "dest": "/wsgi.py"
       }
     ],
     "env": {
       "FLASK_ENV": "production",
-      "FLASK_APP": "app.py"
+      "FLASK_APP": "app.py",
+      "PYTHONUNBUFFERED": "1",
+      "VERCEL_DEPLOYMENT": "1"
     },
     "functions": {
-      "app.py": {
-        "memory": 1024,
-        "maxDuration": 60
+      "wsgi.py": {
+        "memory": 1536,
+        "maxDuration": 120
       }
     }
   }

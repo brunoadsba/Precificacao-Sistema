@@ -18,8 +18,7 @@
     {% endwith %}
     
     <form id="orcamentoForm" method="POST" action="{{ url_for('processar_formulario') }}" onkeypress="return event.keyCode != 13;">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="card mb-4" style="background-color: #1a202c; border: none;">
             <div class="card-header bg-primary text-white rounded-top">
                 <h3 class="mb-0">Informações do Cliente</h3>
