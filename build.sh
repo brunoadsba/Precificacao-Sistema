@@ -1,29 +1,28 @@
 #!/bin/bash
 
-# Script de build para o Vercel
+# Script de build para ambiente local
 
 echo "Iniciando script de build..."
 echo "Diretório atual: $(pwd)"
 echo "Conteúdo do diretório: $(ls -la)"
 
-# Instalar dependências
-echo "Instalando dependências..."
-pip install -r vercel-requirements.txt
-
-# Verificar se Flask-Session foi instalado
-echo "Verificando se Flask-Session foi instalado..."
-if pip show flask-session; then
-    echo "Flask-Session está instalado"
-else
-    echo "Flask-Session NÃO está instalado, tentando instalar novamente..."
-    pip install Flask-Session==0.8.0
-    
-    if pip show flask-session; then
-        echo "Flask-Session instalado com sucesso na segunda tentativa"
-    else
-        echo "AVISO: Flask-Session ainda não está instalado, mas continuaremos mesmo assim"
-    fi
+# Verificar se o ambiente virtual existe
+if [ ! -d "venv" ]; then
+    echo "Criando ambiente virtual..."
+    python -m venv venv
 fi
+
+# Ativar ambiente virtual
+echo "Ativando ambiente virtual..."
+source venv/bin/activate
+
+# Instalar dependências principais primeiro
+echo "Instalando dependências principais..."
+pip install -U pip setuptools wheel
+
+# Instalar dependências do requirements.txt
+echo "Instalando dependências do requirements.txt..."
+pip install -r requirements.txt
 
 # Criar diretório de sessão
 echo "Criando diretório de sessão..."
@@ -48,8 +47,15 @@ fi
 
 # Verificar variáveis de ambiente
 echo "Verificando variáveis de ambiente..."
-echo "VERCEL_DEPLOYMENT: $VERCEL_DEPLOYMENT"
-echo "FLASK_ENV: $FLASK_ENV"
+if [ ! -f ".env" ]; then
+    echo "Criando arquivo .env..."
+    echo "SECRET_KEY=chave_secreta_padrao" > .env
+    echo "FLASK_ENV=production" >> .env
+    echo "FLASK_APP=app.py" >> .env
+    echo "SESSION_TYPE=filesystem" >> .env
+    echo "SESSION_PERMANENT=False" >> .env
+    echo "SESSION_FILE_DIR=./flask_session" >> .env
+fi
 
 # Listar pacotes instalados
 echo "Pacotes instalados:"
@@ -58,15 +64,5 @@ pip list
 # Verificar Python
 echo "Versão do Python: $(python --version)"
 echo "Caminho do Python: $(which python)"
-
-# Verificar se podemos importar flask_session
-echo "Tentando importar flask_session..."
-python -c "
-try:
-    import flask_session
-    print('flask_session importado com sucesso')
-except ImportError as e:
-    print(f'Erro ao importar flask_session: {e}')
-"
 
 echo "Build concluído com sucesso!" 

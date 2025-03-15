@@ -6,15 +6,15 @@ echo "Iniciando script de build para o Vercel..."
 echo "Diretório atual: $(pwd)"
 echo "Conteúdo do diretório: $(ls -la)"
 
+# Instalar dependências principais primeiro
+echo "Instalando dependências principais..."
+pip install -U pip setuptools wheel
+
 # Instalar dependências diretamente
-echo "Instalando dependências diretamente..."
-pip install Flask==2.3.3 Werkzeug==2.3.7 Flask-WTF==1.2.0 pandas==2.2.0 python-dotenv==1.0.0 Babel==2.8.0 reportlab==4.3.1 waitress==2.1.2 email-validator==2.0.0.post2 Flask-Mail==0.9.1 cachelib==0.13.0
+echo "Instalando dependências específicas..."
+pip install Flask==2.3.3 Werkzeug==2.3.7 Flask-WTF==1.2.0 pandas==2.2.0 python-dotenv==1.0.0 Babel==2.8.0 reportlab==4.3.1 waitress==2.1.2 email-validator==2.0.0.post2 Flask-Mail==0.9.1 cachelib==0.13.0 Flask-Session==0.8.0
 
-# Tentar instalar Flask-Session
-echo "Tentando instalar Flask-Session..."
-pip install Flask-Session==0.8.0
-
-# Criar diretório de sessão
+# Criar diretório de sessão e garantir permissões
 echo "Criando diretório de sessão..."
 mkdir -p flask_session
 chmod 777 flask_session
@@ -72,6 +72,7 @@ waitress==2.1.2
 email-validator==2.0.0.post2
 Flask-Mail==0.9.1
 cachelib==0.13.0
+Flask-Session==0.8.0
 EOL
 
 echo "Build concluído com sucesso!" 

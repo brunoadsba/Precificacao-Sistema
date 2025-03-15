@@ -80,16 +80,19 @@ try:
     ambiente_info = verificar_ambiente()
     logger.info(f"Informações do ambiente: {ambiente_info}")
     
-    # Verificar se Flask-Session está disponível antes de importar app
+    # Tentar importar a aplicação simplificada primeiro
     try:
-        import flask_session
-        logger.info("Flask-Session está disponível")
-    except ImportError:
-        logger.warning("Flask-Session não está disponível, continuando sem ele")
-    
-    # Agora importamos a aplicação
-    from app import app
-    logger.info("Aplicação importada com sucesso")
+        from vercel_app import app
+        logger.info("Aplicação simplificada importada com sucesso")
+    except ImportError as e:
+        logger.warning(f"Erro ao importar aplicação simplificada: {str(e)}")
+        # Tentar importar a aplicação completa
+        try:
+            from app import app
+            logger.info("Aplicação completa importada com sucesso")
+        except ImportError as e:
+            logger.error(f"Erro ao importar aplicação completa: {str(e)}")
+            raise
     
 except Exception as e:
     logger.error(f"Erro ao inicializar a aplicação: {str(e)}")

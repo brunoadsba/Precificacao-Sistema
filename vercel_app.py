@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import os
 import sys
 import logging
 import traceback
+import json
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -16,6 +17,21 @@ logger.info(f"Inicializando vercel-app.py no ambiente Vercel: {is_vercel}")
 try:
     app = Flask(__name__)
     app.secret_key = os.getenv('SECRET_KEY', 'chave_secreta_padrao')
+    
+    # Configurar sessão
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = os.path.join(os.getcwd(), 'flask_session')
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+    
+    # Tentar inicializar Flask-Session
+    try:
+        from flask_session import Session
+        Session(app)
+        logger.info("Flask-Session inicializado com sucesso")
+    except ImportError:
+        logger.warning("Flask-Session não está disponível, usando sessão padrão do Flask")
+    
     logger.info("Aplicativo Flask inicializado com sucesso")
     
 except Exception as e:
@@ -26,12 +42,16 @@ except Exception as e:
 @app.route('/')
 def index():
     """Rota principal para verificar se a aplicação está funcionando"""
-    return jsonify({
-        'status': 'ok',
-        'message': 'Aplicação simplificada para o Vercel funcionando corretamente',
-        'environment': os.environ.get('FLASK_ENV', 'não definido'),
-        'vercel_deployment': os.environ.get('VERCEL_DEPLOYMENT', 'não definido')
-    })
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        logger.error(f"Erro ao renderizar template: {str(e)}")
+        return jsonify({
+            'status': 'ok',
+            'message': 'Aplicação simplificada para o Vercel funcionando corretamente',
+            'environment': os.environ.get('FLASK_ENV', 'não definido'),
+            'vercel_deployment': os.environ.get('VERCEL_DEPLOYMENT', 'não definido')
+        })
 
 @app.route('/diagnostico')
 def diagnostico():
@@ -48,83 +68,63 @@ def diagnostico():
         pgr_path = os.path.join(os.getcwd(), 'Precos_PGR.csv')
         ambientais_path = os.path.join(os.getcwd(), 'Precos_Ambientais.csv')
         
+        # Verificar se os templates existem
+        templates_dir = os.path.join(os.getcwd(), 'templates')
+        templates_dir_exists = os.path.exists(templates_dir)
+        
+        # Verificar se os arquivos estáticos existem
+        static_dir = os.path.join(os.getcwd(), 'static')
+        static_dir_exists = os.path.exists(static_dir)
+        
         return jsonify({
             'status': 'ok',
             'python_version': sys.version,
             'platform': sys.platform,
             'cwd': os.getcwd(),
+            'environment': os.environ.get('FLASK_ENV', 'não definido'),
+            'vercel_deployment': os.environ.get('VERCEL_DEPLOYMENT', 'não definido'),
             'session_dir_exists': session_dir_exists,
             'pgr_exists': os.path.exists(pgr_path),
             'ambientais_exists': os.path.exists(ambientais_path),
-            'env': {
-                'FLASK_ENV': os.environ.get('FLASK_ENV', 'não definido'),
-                'VERCEL_DEPLOYMENT': os.environ.get('VERCEL_DEPLOYMENT', 'não definido'),
-                'SESSION_TYPE': os.environ.get('SESSION_TYPE', 'não definido')
-            },
-            'dependencies': {
-                'flask': installed_packages.get('flask', 'não instalado'),
-                'flask-session': installed_packages.get('flask-session', 'não instalado'),
-                'werkzeug': installed_packages.get('werkzeug', 'não instalado')
-            },
-            'request_info': {
-                'path': request.path,
-                'method': request.method,
-                'headers': dict(request.headers)
-            }
+            'templates_dir_exists': templates_dir_exists,
+            'static_dir_exists': static_dir_exists,
+            'installed_packages': installed_packages
         })
     except Exception as e:
-        logger.error(f"Erro na rota de diagnóstico: {str(e)}")
-        return jsonify({'erro': str(e)}), 500
+        logger.error(f"Erro no diagnóstico: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e),
+            'traceback': traceback.format_exc()
+        })
 
 @app.route('/teste')
 def teste():
-    """Rota de teste para verificar se a aplicação está funcionando corretamente"""
-    try:
-        from datetime import datetime
-        return jsonify({
-            'status': 'ok',
-            'message': 'Aplicação funcionando corretamente',
-            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'environment': os.environ.get('FLASK_ENV', 'não definido')
-        })
-    except Exception as e:
-        logger.error(f"Erro na rota de teste: {str(e)}")
-        return jsonify({'erro': str(e)}), 500
+    """Rota de teste para verificar se a aplicação está funcionando"""
+    return jsonify({
+        'status': 'ok',
+        'message': 'Rota de teste funcionando corretamente'
+    })
 
 @app.route('/dependencias')
 def dependencias():
-    """Rota para verificar as dependências instaladas"""
+    """Rota para listar as dependências instaladas"""
     try:
         import pkg_resources
         installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
-        
-        # Verificar dependências específicas
-        dependencies = {
-            'flask': installed_packages.get('flask', 'não instalado'),
-            'flask-session': installed_packages.get('flask-session', 'não instalado'),
-            'flask-wtf': installed_packages.get('flask-wtf', 'não instalado'),
-            'pandas': installed_packages.get('pandas', 'não instalado'),
-            'python-dotenv': installed_packages.get('python-dotenv', 'não instalado'),
-            'babel': installed_packages.get('babel', 'não instalado'),
-            'waitress': installed_packages.get('waitress', 'não instalado')
-        }
-        
-        # Verificar se Flask-Session está disponível
-        try:
-            import flask_session
-            flask_session_available = 'sim'
-        except ImportError:
-            flask_session_available = 'não'
-        
-        return jsonify({
-            'python_version': sys.version,
-            'dependencies': dependencies,
-            'flask_session_available': flask_session_available,
-            'all_packages': installed_packages
-        })
+        return jsonify(installed_packages)
     except Exception as e:
-        logger.error(f"Erro na rota de dependências: {str(e)}")
-        return jsonify({'erro': str(e)}), 500
+        logger.error(f"Erro ao listar dependências: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        })
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    from waitress import serve
+    
+    # Obter porta do ambiente ou usar 3000 como padrão
+    port = int(os.environ.get("PORT", 3000))
+    
+    print(f"Iniciando servidor na porta {port}")
+    serve(app, host="0.0.0.0", port=port) 
