@@ -10,10 +10,6 @@ logger = logging.getLogger(__name__)
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Verificar se estamos no ambiente Vercel
-is_vercel = os.getenv('VERCEL_DEPLOYMENT', '0') == '1'
-logger.info(f"Ambiente Vercel: {is_vercel}")
-
 # Verificar se Flask-Session está disponível
 try:
     import flask_session
@@ -49,13 +45,11 @@ class Config:
     WTF_CSRF_CHECK_DEFAULT = False  # Desabilita a verificação automática para permitir isenções específicas
     WTF_CSRF_TIME_LIMIT = 3600  # Tempo de validade do token em segundos (1 hora)
     
-    # Configurações específicas para o Vercel
-    if is_vercel:
-        # Configurações para o ambiente Vercel
-        DEBUG = False
-        TESTING = False
-        PREFERRED_URL_SCHEME = 'https'
-        
+    # Configurações de ambiente
+    DEBUG = os.getenv('FLASK_ENV', 'production') != 'production'
+    TESTING = False
+    PREFERRED_URL_SCHEME = 'https'
+    
     # Configurações de logging
     LOG_LEVEL = logging.INFO
     
@@ -67,7 +61,6 @@ class Config:
             'platform': sys.platform,
             'cwd': os.getcwd(),
             'env': {
-                'FLASK_ENV': os.environ.get('FLASK_ENV', 'não definido'),
-                'VERCEL_DEPLOYMENT': os.environ.get('VERCEL_DEPLOYMENT', 'não definido')
+                'FLASK_ENV': os.environ.get('FLASK_ENV', 'não definido')
             }
         }

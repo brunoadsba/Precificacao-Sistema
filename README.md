@@ -36,7 +36,6 @@ Sistema web desenvolvido para automatizar a geração de orçamentos de serviço
 - **Banco de Dados**: CSV para armazenamento de dados
 - **E-mail**: SMTP com suporte Gmail
 - **Estilização**: Bootstrap 5
-- **Deploy**: Vercel
 
 ## 📋 Pré-requisitos
 
@@ -207,7 +206,7 @@ Para suporte ou dúvidas:
 
 ## 🌐 Demo
 
-Acesse a demonstração do sistema em: [https://precificacao-sistema.vercel.app/](https://precificacao-sistema.vercel.app/)
+Acesse a demonstração do sistema em: [Link para demonstração]
 
 ![Captura de tela 2025-02-28 153610](https://github.com/user-attachments/assets/4a791681-8c47-45f2-aa6e-ced70bc45ab3)
 

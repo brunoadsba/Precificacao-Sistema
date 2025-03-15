@@ -9,10 +9,6 @@ import traceback
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Verificar se estamos no ambiente Vercel
-is_vercel = os.getenv('VERCEL_DEPLOYMENT', '0') == '1'
-logger.info(f"Ambiente Vercel: {is_vercel}")
-
 def verificar_ambiente():
     """Verifica se o ambiente está configurado corretamente"""
     logger.info("Verificando ambiente...")
@@ -60,7 +56,6 @@ def verificar_ambiente():
     
     # Verificar variáveis de ambiente
     logger.info(f"FLASK_ENV: {os.environ.get('FLASK_ENV', 'não definido')}")
-    logger.info(f"VERCEL_DEPLOYMENT: {os.environ.get('VERCEL_DEPLOYMENT', 'não definido')}")
     
     return {
         'session_dir_exists': os.path.exists(session_dir),
@@ -70,8 +65,7 @@ def verificar_ambiente():
         'platform': sys.platform,
         'cwd': os.getcwd(),
         'env': {
-            'FLASK_ENV': os.environ.get('FLASK_ENV', 'não definido'),
-            'VERCEL_DEPLOYMENT': os.environ.get('VERCEL_DEPLOYMENT', 'não definido')
+            'FLASK_ENV': os.environ.get('FLASK_ENV', 'não definido')
         }
     }
 
@@ -80,19 +74,9 @@ try:
     ambiente_info = verificar_ambiente()
     logger.info(f"Informações do ambiente: {ambiente_info}")
     
-    # Tentar importar a aplicação simplificada primeiro
-    try:
-        from vercel_app import app
-        logger.info("Aplicação simplificada importada com sucesso")
-    except ImportError as e:
-        logger.warning(f"Erro ao importar aplicação simplificada: {str(e)}")
-        # Tentar importar a aplicação completa
-        try:
-            from app import app
-            logger.info("Aplicação completa importada com sucesso")
-        except ImportError as e:
-            logger.error(f"Erro ao importar aplicação completa: {str(e)}")
-            raise
+    # Importar a aplicação
+    from app import app
+    logger.info("Aplicação importada com sucesso")
     
 except Exception as e:
     logger.error(f"Erro ao inicializar a aplicação: {str(e)}")
@@ -109,7 +93,7 @@ except Exception as e:
             'environment': verificar_ambiente()
         })
 
-# Ponto de entrada para o Vercel
+# Ponto de entrada para o servidor
 app = app
 
 if __name__ == "__main__":

@@ -18,9 +18,9 @@ import traceback
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Verificar se estamos no ambiente Vercel
-is_vercel = os.getenv('VERCEL_DEPLOYMENT', '0') == '1'
-logger.info(f"Inicializando app.py no ambiente Vercel: {is_vercel}")
+# Verificar ambiente
+is_production = os.getenv('FLASK_ENV', 'development') == 'production'
+logger.info(f"Inicializando app.py no ambiente: {os.getenv('FLASK_ENV', 'development')}")
 
 # Tentar importar Flask-Session, mas continuar mesmo se não estiver disponível
 try:
@@ -848,6 +848,12 @@ def gerar_orcamento():
         
         app.logger.info("Iniciando função gerar_orcamento")
         
+        # Verificar se estamos em ambiente de produção
+        is_production = os.environ.get('FLASK_ENV') == 'production'
+        
+        # Obter dados do formulário
+        data = request.form.to_dict()
+        
         # Verificar se há dados na sessão
         if 'servicos' not in session or not session['servicos']:
             app.logger.error("Dados de serviços não encontrados na sessão")
@@ -894,8 +900,8 @@ def gerar_orcamento():
         
         app.logger.info(f"PDF gerado com sucesso em memória")
         
-        # Verificar se estamos em ambiente de produção (Vercel)
-        is_vercel = os.environ.get('VERCEL', False)
+        # Verificar se estamos em ambiente de produção
+        is_production = os.environ.get('FLASK_ENV', 'development') == 'production'
         
         # Enviar e-mail com o orçamento, se o e-mail estiver disponível
         if email:
