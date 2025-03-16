@@ -17,29 +17,29 @@ class Config:
     
     # Configurações de diretórios
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
-    ORCAMENTOS_FOLDER = os.path.join(BASE_DIR, 'orcamentos')
-    CSV_FOLDER = os.path.join(BASE_DIR, 'csv')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(BASE_DIR, '..', 'uploads')
+    ORCAMENTOS_FOLDER = os.environ.get('ORCAMENTOS_FOLDER') or os.path.join(BASE_DIR, '..', 'orcamentos')
+    CSV_FOLDER = os.environ.get('CSV_FOLDER') or os.path.join(BASE_DIR, '..', 'csv')
     
-    # Configurações de e-mail
-    EMAIL_SERVER = os.environ.get('EMAIL_SERVER') or 'smtp.gmail.com'
-    EMAIL_PORT = int(os.environ.get('EMAIL_PORT') or 587)
+    # Configurações de e-mail (alinhado com .env)
+    EMAIL_SERVER = os.environ.get('EMAIL_SERVIDOR_SMTP') or 'smtp.gmail.com'
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORTA_SMTP') or 587)
     EMAIL_USERNAME = os.environ.get('EMAIL_REMETENTE')
     EMAIL_PASSWORD = os.environ.get('EMAIL_SENHA')
-    EMAIL_USE_TLS = True
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USAR_TLS', 'True').lower() == 'true'
     EMAIL_USE_SSL = False
     
     # Configurações de logging
     LOG_LEVEL = logging.INFO
     LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    LOG_FILE = os.path.join(BASE_DIR, 'logs', 'app.log')
+    LOG_FILE = os.path.join(BASE_DIR, '..', 'logs', 'app.log')
     
     # Configurações de preços
-    PRECO_PGR_CSV = os.path.join(CSV_FOLDER, 'Precos_PGR.csv')
-    PRECO_AMBIENTAIS_CSV = os.path.join(CSV_FOLDER, 'Precos_Ambientais.csv')
+    PRECO_PGR_CSV = os.environ.get('PRECOS_PGR_CSV') or os.path.join(CSV_FOLDER, 'Precos_PGR.csv')
+    PRECO_AMBIENTAIS_CSV = os.environ.get('PRECOS_AMBIENTAIS_CSV') or os.path.join(CSV_FOLDER, 'Precos_Ambientais.csv')
     
-    # Configurações de percentuais
-    PERCENTUAL_SESI_PADRAO = 30
+    # Configurações de percentuais (usar variável de ambiente)
+    PERCENTUAL_SESI_PADRAO = int(os.environ.get('PERCENTUAL_SESI_PADRAO', 10))
     
     @staticmethod
     def init_app(app):
@@ -47,16 +47,19 @@ class Config:
         # Criar diretórios necessários
         os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
         os.makedirs(Config.ORCAMENTOS_FOLDER, exist_ok=True)
-        os.makedirs(os.path.join(Config.BASE_DIR, 'logs'), exist_ok=True)
+        os.makedirs(os.path.join(Config.BASE_DIR, '..', 'logs'), exist_ok=True)
+        os.makedirs(Config.CSV_FOLDER, exist_ok=True)
         
-        # Configurar logging
+        # Configurar logging (diferente para Render)
+        is_render = os.getenv('RENDER') == '1'
+        handlers = [logging.StreamHandler()]  # Sempre logar no console
+        if not is_render:
+            handlers.append(logging.FileHandler(Config.LOG_FILE))  # Logar em arquivo apenas fora do Render
+        
         logging.basicConfig(
             level=Config.LOG_LEVEL,
             format=Config.LOG_FORMAT,
-            handlers=[
-                logging.FileHandler(Config.LOG_FILE),
-                logging.StreamHandler()
-            ]
+            handlers=handlers
         )
 
 

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Configurar logging
+# Configurar logging básico (será sobrescrito pelo config.py)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -31,7 +31,7 @@ def create_app():
     CORS(app)
     
     # Carregar configurações
-    from config import get_config
+    from config.config import get_config
     config = get_config()
     app.config.from_object(config)
     config.init_app(app)
@@ -45,11 +45,10 @@ def create_app():
     # Verificar se estamos no Render
     is_render = os.getenv('RENDER') == '1'
     
-    # Criar diretórios necessários
-    os.makedirs('logs', exist_ok=True)
-    os.makedirs('orcamentos', exist_ok=True)
-    os.makedirs('uploads', exist_ok=True)
-    os.makedirs('csv', exist_ok=True)
+    # Criar diretórios necessários (já criado no config.py, mas mantido para compatibilidade)
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['ORCAMENTOS_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['CSV_FOLDER'], exist_ok=True)
     
     # Configurar serviços
     if is_production or is_vercel or is_render:
@@ -147,4 +146,3 @@ if __name__ == '__main__':
     
     logger.info(f"Iniciando servidor em {host}:{port} (debug={debug})")
     app.run(host=host, port=port, debug=debug)
-
