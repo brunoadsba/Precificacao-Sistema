@@ -1,4 +1,45 @@
-.env
+# Ambiente virtual
 venv/
+env/
+ENV/
+
+# Arquivos de configuração
+.env
+.env.*
+!.env.example
+
+# Arquivos de cache Python
 __pycache__/
-*.pyc 
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Diretórios de dados
+orcamentos/
+uploads/
+logs/
+flask_session/
+
+# Arquivos de IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Arquivos de distribuição
+dist/
+build/
+*.egg-info/
+
+# Arquivos temporários
+*.log
+*.tmp
+*.bak
+*.pid
+*.db
+*.sqlite3 

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Precificação Automática</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/script.js" defer></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Sistema de Precificação Automática</h1>
+            <p>Geração de orçamentos para serviços de saúde e segurança do trabalho</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="form-section">
+            <h2>Novo Orçamento</h2>
+            
+            <form id="orcamento-form">
+                <div class="form-group">
+                    <h3>Dados do Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="empresa">Empresa</label>
+                            <input type="text" id="empresa" name="empresa" required>
+                        </div>
+                        <div class="form-field">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="telefone">Telefone</label>
+                            <input type="tel" id="telefone" name="telefone">
+                        </div>
+                        <div class="form-field">
+                            <label for="contato">Contato</label>
+                            <input type="text" id="contato" name="contato">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h3>Serviços</h3>
+                    <div id="servicos-container">
+                        <div class="servico-item" data-index="0">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label for="servico-0">Serviço</label>
+                                    <select id="servico-0" name="servicos[0][nome]" class="servico-select" required>
+                                        <option value="">Selecione um serviço</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="regiao-0">Região</label>
+                                    <select id="regiao-0" name="servicos[0][regiao]" class="regiao-select" required disabled>
+                                        <option value="">Selecione uma região</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row variaveis-container" id="variaveis-0">
+                                <!-- Variáveis dinâmicas serão inseridas aqui -->
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label for="valor-0">Valor</label>
+                                    <input type="text" id="valor-0" name="servicos[0][valor]" readonly>
+                                </div>
+                                <div class="form-field">
+                                    <button type="button" class="btn btn-danger remover-servico" data-index="0">Remover</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="adicionar-servico" class="btn btn-secondary">Adicionar Serviço</button>
+                </div>
+
+                <div class="form-group">
+                    <h3>Resumo</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="subtotal">Subtotal</label>
+                            <input type="text" id="subtotal" name="subtotal" readonly>
+                        </div>
+                        <div class="form-field">
+                            <label for="percentual-sesi">Percentual SESI (%)</label>
+                            <input type="number" id="percentual-sesi" name="percentual_sesi" value="30" min="0" max="100">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="valor-sesi">Valor SESI</label>
+                            <input type="text" id="valor-sesi" name="valor_sesi" readonly>
+                        </div>
+                        <div class="form-field">
+                            <label for="total">Total</label>
+                            <input type="text" id="total" name="total" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-row">
+                        <div class="form-field checkbox-field">
+                            <input type="checkbox" id="enviar-email" name="enviar_email">
+                            <label for="enviar-email">Enviar orçamento por e-mail</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Gerar Orçamento</button>
+                    <button type="reset" class="btn btn-secondary">Limpar</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="resultado-section" style="display: none;">
+            <h2>Orçamento Gerado</h2>
+            <div id="resultado-orcamento">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Número do Orçamento</label>
+                        <p id="numero-orcamento"></p>
+                    </div>
+                    <div class="form-field">
+                        <label>Total</label>
+                        <p id="resultado-total"></p>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <a id="download-pdf" href="#" class="btn btn-primary" target="_blank">Download PDF</a>
+                    <button id="novo-orcamento" class="btn btn-secondary">Novo Orçamento</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Sistema de Precificação Automática. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+</body>
+</html> 

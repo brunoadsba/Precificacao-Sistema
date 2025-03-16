@@ -1,9 +1,126 @@
 # Sistema de Precificação Automática
 
-Sistema web desenvolvido para automatizar a geração de orçamentos de serviços de saúde e segurança ocupacional, com suporte a múltiplos tipos de serviços e cálculos complexos de precificação.
+Sistema web para precificação automática de serviços de saúde e segurança do trabalho.
 
-![Versão](https://img.shields.io/badge/versão-1.0.0-blue)
-![Status](https://img.shields.io/badge/status-produção-green)
+## Descrição
+
+Este sistema permite a precificação automática de serviços de saúde e segurança do trabalho, com base em parâmetros como região, tipo de serviço, número de trabalhadores e grau de risco. O sistema gera orçamentos em PDF e permite o envio por e-mail.
+
+## Estrutura do Projeto
+
+```
+.
+├── app.py                  # Arquivo principal da aplicação
+├── config.py               # Configurações da aplicação
+├── models/                 # Modelos de dados
+│   ├── __init__.py
+│   └── precos.py           # Gerenciador de preços
+├── routes/                 # Rotas da aplicação
+│   ├── __init__.py
+│   └── orcamentos.py       # Rotas para orçamentos
+├── services/               # Serviços da aplicação
+│   ├── __init__.py
+│   └── email_sender.py     # Serviço de envio de e-mails
+├── utils/                  # Utilitários
+│   ├── __init__.py
+│   └── orcamento_utils.py  # Utilitários para orçamentos
+├── static/                 # Arquivos estáticos
+│   ├── script.js           # JavaScript da aplicação
+│   └── style.css           # Estilos CSS
+├── templates/              # Templates HTML
+│   ├── index.html          # Página principal
+│   ├── 404.html            # Página de erro 404
+│   └── 500.html            # Página de erro 500
+├── csv/                    # Arquivos CSV de preços
+│   ├── Precos_PGR.csv      # Preços de PGR
+│   └── Precos_Ambientais.csv # Preços de serviços ambientais
+├── orcamentos/             # Diretório para armazenar orçamentos gerados
+├── uploads/                # Diretório para uploads temporários
+├── logs/                   # Logs da aplicação
+├── requirements.txt        # Dependências do projeto
+└── build.sh                # Script para configuração do ambiente
+```
+
+## Requisitos
+
+- Python 3.8+
+- Flask
+- Pandas
+- ReportLab
+- Outras dependências listadas em `requirements.txt`
+
+## Instalação
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/precificacao-sistema.git
+   cd precificacao-sistema
+   ```
+
+2. Execute o script de configuração:
+   ```bash
+   chmod +x build.sh
+   ./build.sh
+   ```
+
+3. Configure as variáveis de ambiente:
+   ```bash
+   # O script build.sh já cria um arquivo .env a partir do .env.example
+   # Edite o arquivo .env com suas configurações
+   ```
+
+## Execução
+
+Para executar a aplicação em modo de desenvolvimento:
+
+```bash
+python app.py
+```
+
+A aplicação estará disponível em `http://localhost:5000`.
+
+## Funcionalidades
+
+- Precificação automática de serviços
+- Geração de orçamentos em PDF
+- Envio de orçamentos por e-mail
+- Cálculo de custos logísticos
+- Cálculo de custos laboratoriais
+- Cálculo de custos para múltiplos dias de coleta
+
+## Tipos de Serviços Suportados
+
+### Serviços Ambientais
+- Coleta para Avaliação Ambiental
+- Laudo de Insalubridade
+- Outros serviços configuráveis via CSV
+
+### Programa de Gerenciamento de Riscos (PGR)
+- Elaboração e acompanhamento do PGR
+- Suporte a diferentes graus de risco
+- Cálculo baseado no número de trabalhadores
+
+## Configuração de E-mail
+
+O sistema utiliza SMTP para envio de orçamentos. Para configurar:
+
+1. Edite o arquivo `.env` com suas credenciais de e-mail
+2. Para Gmail, é necessário:
+   - Habilitar autenticação de duas etapas
+   - Gerar senha de aplicativo
+   - Usar essa senha no arquivo `.env`
+
+## Contribuição
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Faça commit das suas alterações (`git commit -m 'Adiciona nova feature'`)
+4. Faça push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
 
 ## 🚀 Funcionalidades
 

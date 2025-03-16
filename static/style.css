@@ -1,577 +1,233 @@
+/* Estilos gerais */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --border-color: #dee2e6;
+    --border-radius: 0.25rem;
+    --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --transition: all 0.2s ease-in-out;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f5f7fa; /* Modo claro: fundo claro e suave */
-    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background-color: #f5f5f5;
+}
+
+.container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-    transition: background-color 0.3s ease, color 0.3s ease; /* Transição suave entre modos */
+    padding: 0 15px;
 }
 
-/* Modo escuro */
-body.dark-mode {
-    background-color: #1a202c; /* Fundo escuro para o corpo */
-    color: #ffffff; /* Texto branco para contraste */
+/* Cabeçalho */
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+    box-shadow: var(--box-shadow);
 }
 
-/* Estilos para o título principal no navbar */
-.title-main {
-    white-space: nowrap; /* Impede a quebra de linha */
-    font-size: 1.5rem; /* Aumenta a fonte para destacar como título */
-    color: #ffffff !important; /* Texto branco para contraste com o fundo azul */
-    font-weight: bold; /* Deixa o título mais destacado */
+header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
 }
 
-.no-wrap {
-    white-space: nowrap; /* Impede a quebra de linha para outros elementos, se necessário */
+/* Seções */
+section {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
 }
 
-.navbar-brand {
-    padding: 0.5rem 1rem; /* Ajuste o padding para melhor apresentação */
-    color: #ffffff !important; /* Texto branco no navbar */
-    width: 100%; /* Garante que o brand ocupe toda a largura em dispositivos móveis */
-    text-align: center; /* Centraliza o título em desktop e mobile */
+section h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.nav-link {
-    color: #ffffff !important; /* Texto branco para o menu "Novo Orçamento" */
+section h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
 }
 
-.navbar {
-    background-color: #2563eb; /* Azul médio vibrante e profissional */
-    padding: 0.5rem 1rem; /* Ajuste o padding, se necessário */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra leve para profundidade */
+/* Formulários */
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
-.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .nav-link:hover {
-    color: #bfdbfe; /* Tom mais claro de azul para hover, mantendo a harmonia */
-}
-
-.navbar-toggler {
-    border: none; /* Remove borda do botão de colapso */
-    color: #ffffff; /* Ícone branco */
-}
-
-/* Botão de alternância de tema */
-#themeToggle {
-    font-size: 1.25rem; /* Tamanho maior para o ícone */
-    margin-right: 0.5rem; /* Espaçamento à direita */
-}
-
-#themeToggle:hover {
-    color: #bfdbfe; /* Cor mais clara no hover */
-}
-
-/* Estilos para o título principal no formulário */
-h1 {
-    text-align: center;
-    color: #2563eb; /* Azul médio para o título, mantendo consistência */
-    margin-bottom: 30px;
-    font-size: 24px;
-    background-color: #bfdbfe; /* Fundo azul claro para contraste */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra leve para profundidade */
-}
-
-/* Modo escuro para h1 */
-body.dark-mode h1 {
-    color: #bfdbfe; /* Texto azul claro no modo escuro */
-    background-color: #374151; /* Fundo cinza escuro no modo escuro */
-}
-
-/* Estilos para os cabeçalhos dos cards */
-.card-header {
-    background-color: #2563eb; /* Azul médio para consistência com o navbar */
-    color: #ffffff;
-    border-radius: 8px 8px 0 0; /* Cantos arredondados apenas no topo */
-    font-weight: bold;
-    padding: 15px; /* Ajuste o padding para melhor apresentação */
-}
-
-/* Estilos para os cards */
-.card {
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    background-color: #f9fafb; /* Modo claro: fundo cinza muito claro e neutro */
-    border: 1px solid #e5e7eb; /* Borda leve para contraste */
-}
-
-/* Modo escuro para cards */
-body.dark-mode .card {
-    background-color: #374151; /* Fundo cinza escuro no modo escuro */
-    border-color: #4a5568; /* Borda cinza mais escura no modo escuro */
-}
-
-/* Estilos para o corpo dos cards */
-.card-body {
-    background-color: #f9fafb; /* Modo claro: fundo cinza claro para o corpo do card */
-    color: #333; /* Texto escuro para contraste com o fundo claro */
-}
-
-/* Modo escuro para o corpo dos cards */
-body.dark-mode .card-body {
-    background-color: #374151; /* Fundo cinza escuro no modo escuro */
-    color: #ffffff; /* Texto branco para contraste */
-}
-
-/* Estilos para labels dentro dos cards */
-.form-label {
-    color: #2563eb; /* Azul médio para labels, mantendo a identidade visual */
-    font-weight: bold;
-}
-
-/* Modo escuro para labels */
-body.dark-mode .form-label {
-    color: #bfdbfe; /* Texto azul claro no modo escuro */
-}
-
-/* Estilos para inputs e selects */
-.form-control, .form-select {
-    background-color: #e5e7eb; /* Modo claro: fundo cinza muito claro para inputs e selects */
-    border: 2px solid #d1d5db; /* Borda cinza clara para contraste */
-    color: #333; /* Texto escuro para contraste */
-    border-radius: 6px; /* Cantos um pouco mais suaves */
-}
-
-/* Modo escuro para inputs e selects */
-body.dark-mode .form-control, body.dark-mode .form-select {
-    background-color: #4a5568; /* Fundo cinza mais escuro no modo escuro */
-    border-color: #6b7280; /* Borda cinza mais escura no modo escuro */
-    color: #ffffff; /* Texto branco para contraste */
-}
-
-.form-control:focus, .form-select:focus {
-    outline: none;
-    border-color: #2563eb; /* Borda azul médio ao focar, mantendo consistência */
-    box-shadow: 0 0 5px rgba(37, 99, 235, 0.5); /* Sombra azul suave */
-}
-
-/* Modo escuro para foco em inputs e selects */
-body.dark-mode .form-control:focus, body.dark-mode .form-select:focus {
-    border-color: #bfdbfe; /* Borda azul claro no modo escuro */
-    box-shadow: 0 0 5px rgba(191, 219, 254, 0.5); /* Sombra azul clara */
-}
-
-.form-control::placeholder, .form-select::placeholder {
-    color: #9ca3af; /* Cor mais clara para placeholders, mantendo legibilidade */
-    opacity: 1;
-}
-
-/* Modo escuro para placeholders */
-body.dark-mode .form-control::placeholder, body.dark-mode .form-select::placeholder {
-    color: #a0aec0; /* Placeholder cinza mais claro no modo escuro */
-}
-
-/* Estilos para os botões de rádio estilizados */
-.radio-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.btn-radio {
-    background-color: #e5e7eb; /* Modo claro: fundo cinza claro para botões desmarcados */
-    color: #333;
-    border: 2px solid #d1d5db; /* Borda cinza clara para consistência */
-    border-radius: 4px; /* Cantos menores para botões pequenos */
-    padding: 6px 12px; /* Padding menor para botões pequenos */
-    font-size: 14px; /* Fonte menor para consistência com o tamanho */
-    cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-/* Modo escuro para botões de rádio */
-body.dark-mode .btn-radio {
-    background-color: #4a5568; /* Fundo cinza mais escuro no modo escuro */
-    border-color: #6b7280; /* Borda cinza mais escura no modo escuro */
-    color: #ffffff; /* Texto branco para contraste */
-}
-
-.btn-radio:hover {
-    background-color: #d1d5db; /* Cinza mais claro no hover no modo claro */
-    border-color: #d1d5db;
-}
-
-/* Modo escuro para hover nos botões de rádio */
-body.dark-mode .btn-radio:hover {
-    background-color: #6b7280; /* Cinza mais claro no hover no modo escuro */
-    border-color: #6b7280;
-}
-
-.btn-check:checked + .btn-radio {
-    background-color: #2563eb; /* Azul médio quando marcado */
-    border-color: #2563eb;
-    color: #ffffff;
-}
-
-/* Modo escuro para botões de rádio marcados */
-body.dark-mode .btn-check:checked + .btn-radio {
-    background-color: #bfdbfe; /* Azul claro quando marcado no modo escuro */
-    border-color: #bfdbfe;
-    color: #1a202c; /* Texto escuro para contraste no modo escuro */
-}
-
-.btn-check:focus + .btn-radio {
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25); /* Sombra ao focar */
-}
-
-/* Modo escuro para foco nos botões de rádio */
-body.dark-mode .btn-check:focus + .btn-radio {
-    box-shadow: 0 0 0 0.2rem rgba(191, 219, 254, 0.25); /* Sombra azul clara no modo escuro */
-}
-
-.row {
+.form-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 15px;
+    margin: 0 -10px 1rem;
 }
 
-.column {
+.form-field {
     flex: 1;
-    min-width: 200px;
+    min-width: 250px;
+    padding: 0 10px;
+    margin-bottom: 1rem;
 }
 
-button, input[type="submit"] {
-    background-color: #2563eb; /* Azul médio para botões, consistência com o design */
-    color: #ffffff;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    margin: 5px;
-    display: inline-block;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
 }
 
-button:hover, input[type="submit"]:hover {
-    background-color: #1d4ed8; /* Azul mais escuro para hover, mantendo harmonia */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+input, select, textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
 }
 
-button:active, input[type="submit"]:active {
-    transform: translateY(0);
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-/* Modo escuro para botões */
-body.dark-mode button, body.dark-mode input[type="submit"] {
-    background-color: #bfdbfe; /* Azul claro no modo escuro */
-    color: #1a202c; /* Texto escuro para contraste */
+input[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
 }
 
-body.dark-mode button:hover, body.dark-mode input[type="submit"]:hover {
-    background-color: #93c5fd; /* Azul mais claro no hover no modo escuro */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.checkbox-field {
+    display: flex;
+    align-items: center;
 }
 
-.servico button[onclick="removerServico(this)"] {
-    background-color: #dc2626; /* Vermelho para botões de remover, mais intuitivo */
+.checkbox-field input {
+    width: auto;
+    margin-right: 0.5rem;
 }
 
-.servico button[onclick="removerServico(this)"]:hover {
-    background-color: #b91c1c; /* Vermelho mais escuro para hover */
+.checkbox-field label {
+    margin-bottom: 0;
 }
 
-/* Modo escuro para botões de remover */
-body.dark-mode .servico button[onclick="removerServico(this)"] {
-    background-color: #f87171; /* Vermelho mais claro no modo escuro */
-    color: #1a202c; /* Texto escuro para contraste */
-}
-
-body.dark-mode .servico button[onclick="removerServico(this)"]:hover {
-    background-color: #ef4444; /* Vermelho mais escuro no hover no modo escuro */
-}
-
-.notes {
-    color: #666;
-    font-size: 12px;
-    margin-top: 20px;
-    text-align: center;
-    line-height: 1.5;
-    background-color: #e5e7eb; /* Modo claro: fundo cinza claro para notas */
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db; /* Borda leve para contraste */
-}
-
-/* Modo escuro para notas */
-body.dark-mode .notes {
-    background-color: #4a5568; /* Fundo cinza mais escuro no modo escuro */
-    color: #ffffff; /* Texto branco para contraste */
-    border-color: #6b7280; /* Borda cinza mais escura no modo escuro */
-}
-
-.button-container {
-    text-align: center;
-    margin: 20px 0;
-}
-
-.success-container {
-    text-align: center;
-    padding: 50px;
-    background-color: #f0fdfa; /* Modo claro: verde claro para mensagens de sucesso */
-    border: 2px solid #a7f3d0; /* Borda verde clara para contraste */
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Modo escuro para mensagens de sucesso */
-body.dark-mode .success-container {
-    background-color: #022c22; /* Verde escuro no modo escuro */
-    border-color: #064e3b; /* Borda verde mais escura no modo escuro */
-    color: #ffffff; /* Texto branco para contraste */
-}
-
+/* Botões */
 .btn {
     display: inline-block;
-    background-color: #2563eb; /* Azul médio para botões, consistência */
-    color: #ffffff;
-    padding: 12px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 16px;
-    margin-top: 20px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn:hover {
-    background-color: #1d4ed8; /* Azul mais escuro para hover */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-/* Modo escuro para botões .btn */
-body.dark-mode .btn {
-    background-color: #bfdbfe; /* Azul claro no modo escuro */
-    color: #1a202c; /* Texto escuro para contraste */
-}
-
-body.dark-mode .btn:hover {
-    background-color: #93c5fd; /* Azul mais claro no hover no modo escuro */
-}
-
-footer {
+    font-weight: 500;
     text-align: center;
-    margin-top: 20px;
-    padding: 15px;
-    color: #666;
-    font-size: 12px;
-    background-color: #e5e7eb; /* Modo claro: fundo cinza claro para o footer */
-    border-top: 1px solid #d1d5db; /* Borda leve para contraste */
-}
-
-/* Modo escuro para footer */
-body.dark-mode footer {
-    background-color: #374151; /* Fundo cinza escuro no modo escuro */
-    color: #ffffff; /* Texto branco para contraste */
-    border-top-color: #4a5568; /* Borda cinza mais escura no modo escuro */
-}
-
-footer a {
-    color: #2563eb; /* Azul médio para links no footer */
+    white-space: nowrap;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    cursor: pointer;
     text-decoration: none;
-    font-size: inherit;
-    transition: color 0.3s ease;
 }
 
-/* Modo escuro para links no footer */
-body.dark-mode footer a {
-    color: #bfdbfe; /* Azul claro no modo escuro */
+.btn-primary {
+    color: white;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
-footer a:hover {
-    text-decoration: underline;
-    color: #1d4ed8; /* Azul mais escuro para hover */
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
 }
 
-/* Modo escuro para hover nos links do footer */
-body.dark-mode footer a:hover {
-    color: #93c5fd; /* Azul mais claro no hover no modo escuro */
+.btn-secondary {
+    color: white;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+}
+
+.btn-danger {
+    color: white;
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Serviços */
+.servico-item {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Resultado */
+#resultado-orcamento {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+#resultado-orcamento p {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* Rodapé */
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    padding: 1.5rem 0;
+    text-align: center;
+    margin-top: 2rem;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
-    .row {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .column {
+    .form-field {
         min-width: 100%;
     }
-
-    body {
-        padding: 10px;
+    
+    .form-actions {
+        flex-direction: column;
     }
-
-    .cliente-info, .servico {
-        padding: 15px;
-    }
-
-    input[type="text"], 
-    input[type="number"], 
-    input[type="email"],
-    select {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    button, input[type="submit"], .btn {
-        padding: 10px 20px;
-        font-size: 14px;
+    
+    .form-actions .btn {
         width: 100%;
-        margin: 5px 0;
+        margin-bottom: 0.5rem;
     }
-
-    h1 {
-        font-size: 20px;
-    }
-
-    .notes, footer {
-        font-size: 10px;
-    }
-
-    .navbar-brand {
-        text-align: center; /* Centraliza o título em dispositivos móveis */
-        width: 100%;
-        padding: 0.5rem 0; /* Reduz padding para melhor ajuste em mobile */
-    }
-
-    .navbar-collapse {
-        justify-content: center !important; /* Centraliza o menu colapsado em dispositivos móveis */
-    }
-
-    .title-main {
-        font-size: 1.2rem; /* Reduz o tamanho da fonte em dispositivos móveis */
-    }
-
-    .navbar-toggler {
-        margin-left: auto; /* Garante que o ícone fique à direita em dispositivos móveis */
-    }
-
-    #themeToggle {
-        font-size: 1rem; /* Reduz o tamanho do ícone em mobile */
-        margin-right: 0.2rem; /* Ajusta o espaçamento em mobile */
-    }
-
-    .btn-radio {
-        padding: 4px 10px; /* Ajusta o padding para botões menores em mobile */
-        font-size: 12px; /* Reduz a fonte em mobile */
-    }
-}
-
-/* Estilos gerais */
-body {
-    background-color: #f5f7fa;
-    color: #333;
-}
-
-/* Estilos para os botões */
-.btn-primary {
-    background-color: #2563eb;
-    border-color: #2563eb;
-}
-
-.btn-primary:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-}
-
-.btn-success {
-    background-color: #10b981; /* Verde mais vibrante para botões de sucesso */
-    border-color: #10b981;
-}
-
-.btn-success:hover {
-    background-color: #059669; /* Verde mais escuro para hover */
-    border-color: #059669;
-}
-
-.btn-danger {
-    background-color: #dc2626; /* Vermelho para botões de remover */
-    border-color: #dc2626;
-}
-
-.btn-danger:hover {
-    background-color: #b91c1c; /* Vermelho mais escuro para hover */
-    border-color: #b91c1c;
-}
-
-/* Estilos para os displays de preço */
-.preco-unitario, .preco-total {
-    font-weight: bold;
-    color: #2563eb; /* Azul médio para preços, consistência */
-}
-
-/* Modo escuro para preços */
-body.dark-mode .preco-unitario, body.dark-mode .preco-total {
-    color: #bfdbfe; /* Azul claro no modo escuro */
-}
-
-#totalOrcamento {
-    font-weight: bold;
-    color: #ffffff; /* Texto branco para contraste com o fundo escuro */
-    font-size: 2rem;
-}
-
-/* Estilos específicos para os botões de Grau de Risco */
-#grauRisco1e2-1 + .btn-radio, 
-[id^="grauRisco1e2-"] + .btn-radio {
-    background-color: #d1fae5; /* Fundo verde claro para Grau 1 e 2 */
-    color: #065f46; /* Texto verde escuro */
-    border-color: #a7f3d0; /* Borda verde clara */
-}
-
-#grauRisco1e2-1:checked + .btn-radio, 
-[id^="grauRisco1e2-"]:checked + .btn-radio {
-    background-color: #10b981; /* Verde mais forte quando selecionado */
-    color: #ffffff; /* Texto branco para contraste */
-    border-color: #059669; /* Borda verde escura */
-}
-
-#grauRisco3e4-1 + .btn-radio, 
-[id^="grauRisco3e4-"] + .btn-radio {
-    background-color: #fee2e2; /* Fundo vermelho claro para Grau 3 e 4 */
-    color: #b91c1c; /* Texto vermelho escuro */
-    border-color: #fecaca; /* Borda vermelha clara */
-}
-
-#grauRisco3e4-1:checked + .btn-radio, 
-[id^="grauRisco3e4-"]:checked + .btn-radio {
-    background-color: #ef4444; /* Vermelho mais forte quando selecionado */
-    color: #ffffff; /* Texto branco para contraste */
-    border-color: #dc2626; /* Borda vermelha escura */
-}
-
-/* Modo escuro para os botões de Grau de Risco */
-body.dark-mode #grauRisco1e2-1 + .btn-radio, 
-body.dark-mode [id^="grauRisco1e2-"] + .btn-radio {
-    background-color: #064e3b; /* Verde escuro para modo escuro */
-    color: #a7f3d0; /* Texto verde claro */
-    border-color: #065f46; /* Borda verde média */
-}
-
-body.dark-mode #grauRisco1e2-1:checked + .btn-radio, 
-body.dark-mode [id^="grauRisco1e2-"]:checked + .btn-radio {
-    background-color: #059669; /* Verde médio quando selecionado no modo escuro */
-    color: #ecfdf5; /* Texto verde muito claro */
-    border-color: #10b981; /* Borda verde clara */
-}
-
-body.dark-mode #grauRisco3e4-1 + .btn-radio, 
-body.dark-mode [id^="grauRisco3e4-"] + .btn-radio {
-    background-color: #7f1d1d; /* Vermelho escuro para modo escuro */
-    color: #fecaca; /* Texto vermelho claro */
-    border-color: #991b1b; /* Borda vermelha média */
-}
-
-body.dark-mode #grauRisco3e4-1:checked + .btn-radio, 
-body.dark-mode [id^="grauRisco3e4-"]:checked + .btn-radio {
-    background-color: #b91c1c; /* Vermelho médio quando selecionado no modo escuro */
-    color: #fee2e2; /* Texto vermelho muito claro */
-    border-color: #ef4444; /* Borda vermelha clara */
 }
