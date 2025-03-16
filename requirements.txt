@@ -26,3 +26,7 @@ gunicorn==21.2.0
 click==8.1.7
 fpdf==1.7.2
 colorama==0.4.6
+firebase-admin==6.2.0
+google-cloud-storage==2.10.0
+google-cloud-firestore==2.11.1
+python-jose==3.3.0

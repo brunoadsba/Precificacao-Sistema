@@ -5,7 +5,7 @@ import os
 import json
 import logging
 from datetime import datetime
-from flask import Blueprint, request, jsonify, render_template, current_app, send_file, send_from_directory
+from flask import Blueprint, request, jsonify, render_template, current_app, send_file, send_from_directory, Response
 from io import BytesIO
 
 from models.precos import gerenciador_precos
@@ -35,7 +35,8 @@ def servicos():
         JSON: Lista de serviços disponíveis
     """
     try:
-        servicos = gerenciador_precos.obter_servicos()
+        gerenciador = current_app.config.get('GERENCIADOR_PRECOS', gerenciador_precos)
+        servicos = gerenciador.obter_servicos()
         return jsonify({
             'success': True,
             'servicos': servicos
@@ -63,7 +64,8 @@ def regioes():
                 'error': 'Parâmetro servico é obrigatório'
             }), 400
             
-        regioes = gerenciador_precos.obter_regioes_disponiveis(servico)
+        gerenciador = current_app.config.get('GERENCIADOR_PRECOS', gerenciador_precos)
+        regioes = gerenciador.obter_regioes_disponiveis(servico)
         return jsonify({
             'success': True,
             'regioes': regioes
@@ -87,7 +89,8 @@ def variaveis(servico):
         JSON: Variáveis disponíveis para o serviço
     """
     try:
-        variaveis = gerenciador_precos.obter_variaveis_disponiveis(servico)
+        gerenciador = current_app.config.get('GERENCIADOR_PRECOS', gerenciador_precos)
+        variaveis = gerenciador.obter_variaveis_disponiveis(servico)
         return jsonify({
             'success': True,
             'variaveis': variaveis
@@ -124,7 +127,8 @@ def calcular_preco():
                 'error': 'Serviço e região são obrigatórios'
             }), 400
         
-        preco = gerenciador_precos.obter_preco_servico(
+        gerenciador = current_app.config.get('GERENCIADOR_PRECOS', gerenciador_precos)
+        preco = gerenciador.obter_preco_servico(
             servico=servico,
             regiao=regiao,
             tipo_avaliacao=tipo_avaliacao,
@@ -164,7 +168,7 @@ def calcular_custos_logisticos_route():
         return jsonify({
             "success": True, 
             "custo": custo,
-            "custo_formatado": f"R$ {custo:.2f}".replace('.', ',')
+            "custo_formatado": formatar_moeda(custo)
         })
         
     except Exception as e:
@@ -185,7 +189,7 @@ def calcular_custos_multiplos_dias_route():
         return jsonify({
             "success": True, 
             "custo": custo,
-            "custo_formatado": f"R$ {custo:.2f}".replace('.', ',')
+            "custo_formatado": formatar_moeda(custo)
         })
         
     except Exception as e:
@@ -222,7 +226,7 @@ def calcular_custos_laboratoriais_route():
         return jsonify({
             "success": True, 
             "custo": custo,
-            "custo_formatado": f"R$ {custo:.2f}".replace('.', ',')
+            "custo_formatado": formatar_moeda(custo)
         })
         
     except Exception as e:
@@ -270,33 +274,86 @@ def gerar_orcamento():
             'total': total
         }
         
-        # Gerar PDF
-        caminho_pdf = gerar_pdf_orcamento(
-            dados_orcamento=dados_orcamento,
-            caminho_orcamentos=current_app.config['ORCAMENTOS_FOLDER']
-        )
-        
-        # Salvar dados do orçamento em arquivo JSON
-        caminho_json = os.path.join(current_app.config['ORCAMENTOS_FOLDER'], f"orcamento_{numero_orcamento}.json")
-        with open(caminho_json, 'w', encoding='utf-8') as f:
-            json.dump(dados_orcamento, f, ensure_ascii=False, indent=4)
-        
-        # Enviar por email se solicitado
-        if dados.get('enviar_email', False):
-            try:
-                corpo_email = gerar_corpo_email_orcamento(dados_orcamento)
-                assunto = f"Orçamento {numero_orcamento} - {dados_orcamento['empresa']}"
+        # Verificar se devemos usar o Firebase Storage
+        if current_app.config.get('USAR_FIREBASE_STORAGE', False):
+            # Usar Firebase Storage
+            from utils.firebase_orcamento_utils import gerar_pdf_orcamento as firebase_gerar_pdf
+            from config.firebase_config import firebase_config
+            
+            # Gerar PDF e obter URL
+            url_pdf = firebase_gerar_pdf(dados_orcamento)
+            
+            if not url_pdf:
+                logger.error(f"Erro ao gerar PDF do orçamento {numero_orcamento} no Firebase")
+                return jsonify({
+                    'success': False,
+                    'error': 'Erro ao gerar PDF do orçamento'
+                }), 500
                 
-                email_service.enviar_email(
-                    destinatario=dados_orcamento['email'],
-                    assunto=assunto,
-                    corpo=corpo_email,
-                    anexos=[caminho_pdf]
-                )
-                
-                logger.info(f"Email enviado para {dados_orcamento['email']} com o orçamento {numero_orcamento}")
-            except Exception as e:
-                logger.error(f"Erro ao enviar email do orçamento {numero_orcamento}: {str(e)}")
+            # Salvar caminho do PDF nos dados do orçamento
+            dados_orcamento['url_pdf'] = url_pdf
+            
+            # Enviar por email se solicitado
+            if dados.get('enviar_email', False):
+                try:
+                    from services.firebase_email_sender import firebase_email_service
+                    
+                    corpo_email = gerar_corpo_email_orcamento(dados_orcamento)
+                    assunto = f"Orçamento {numero_orcamento} - {dados_orcamento['empresa']}"
+                    
+                    # Fazer download do PDF para anexar ao e-mail
+                    pdf_bytes = firebase_config.download_arquivo(f"orcamentos/orcamento_{numero_orcamento}.pdf")
+                    
+                    if pdf_bytes:
+                        # Salvar temporariamente o PDF
+                        temp_pdf_path = os.path.join(current_app.config['ORCAMENTOS_FOLDER'], f"temp_orcamento_{numero_orcamento}.pdf")
+                        with open(temp_pdf_path, 'wb') as f:
+                            f.write(pdf_bytes)
+                        
+                        # Enviar e-mail
+                        firebase_email_service.enviar_email(
+                            destinatario=dados_orcamento['email'],
+                            assunto=assunto,
+                            corpo=corpo_email,
+                            anexos=[temp_pdf_path]
+                        )
+                        
+                        # Remover arquivo temporário
+                        os.remove(temp_pdf_path)
+                    
+                    logger.info(f"Email enviado para {dados_orcamento['email']} com o orçamento {numero_orcamento}")
+                except Exception as e:
+                    logger.error(f"Erro ao enviar email do orçamento {numero_orcamento}: {str(e)}")
+        else:
+            # Usar armazenamento local
+            caminho_pdf = gerar_pdf_orcamento(
+                dados_orcamento=dados_orcamento,
+                caminho_orcamentos=current_app.config['ORCAMENTOS_FOLDER']
+            )
+            
+            # Salvar dados do orçamento em arquivo JSON
+            caminho_json = os.path.join(current_app.config['ORCAMENTOS_FOLDER'], f"orcamento_{numero_orcamento}.json")
+            with open(caminho_json, 'w', encoding='utf-8') as f:
+                json.dump(dados_orcamento, f, ensure_ascii=False, indent=4)
+            
+            # Enviar por email se solicitado
+            if dados.get('enviar_email', False):
+                try:
+                    email_service = current_app.config.get('EMAIL_SERVICE')
+                    
+                    corpo_email = gerar_corpo_email_orcamento(dados_orcamento)
+                    assunto = f"Orçamento {numero_orcamento} - {dados_orcamento['empresa']}"
+                    
+                    email_service.enviar_email(
+                        destinatario=dados_orcamento['email'],
+                        assunto=assunto,
+                        corpo=corpo_email,
+                        anexos=[caminho_pdf]
+                    )
+                    
+                    logger.info(f"Email enviado para {dados_orcamento['email']} com o orçamento {numero_orcamento}")
+                except Exception as e:
+                    logger.error(f"Erro ao enviar email do orçamento {numero_orcamento}: {str(e)}")
         
         return jsonify({
             'success': True,
@@ -325,21 +382,57 @@ def download_orcamento(numero_orcamento):
         File: Arquivo PDF do orçamento
     """
     try:
-        caminho_arquivo = os.path.join('orcamentos', f"orcamento_{numero_orcamento}.pdf")
-        
-        if not os.path.exists(caminho_arquivo):
-            logger.error(f"Arquivo de orçamento não encontrado: {caminho_arquivo}")
-            return jsonify({
-                'success': False,
-                'error': 'Arquivo de orçamento não encontrado'
-            }), 404
-        
-        return send_file(
-            caminho_arquivo,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f"orcamento_{numero_orcamento}.pdf"
-        )
+        # Verificar se devemos usar o Firebase Storage
+        if current_app.config.get('USAR_FIREBASE_STORAGE', False):
+            # Usar Firebase Storage
+            from utils.firebase_orcamento_utils import download_orcamento_pdf
+            from utils.firebase_orcamento_utils import obter_orcamento
+            
+            # Obter dados do orçamento
+            orcamento = obter_orcamento(numero_orcamento)
+            
+            if not orcamento:
+                logger.error(f"Orçamento {numero_orcamento} não encontrado no Firebase")
+                return jsonify({
+                    'success': False,
+                    'error': 'Orçamento não encontrado'
+                }), 404
+            
+            # Fazer download do PDF
+            pdf_bytes = download_orcamento_pdf(numero_orcamento)
+            
+            if not pdf_bytes:
+                logger.error(f"PDF do orçamento {numero_orcamento} não encontrado no Firebase")
+                return jsonify({
+                    'success': False,
+                    'error': 'PDF do orçamento não encontrado'
+                }), 404
+            
+            # Retornar o PDF como resposta
+            return Response(
+                pdf_bytes,
+                mimetype='application/pdf',
+                headers={
+                    'Content-Disposition': f'attachment; filename=orcamento_{numero_orcamento}.pdf'
+                }
+            )
+        else:
+            # Usar armazenamento local
+            caminho_arquivo = os.path.join(current_app.config['ORCAMENTOS_FOLDER'], f"orcamento_{numero_orcamento}.pdf")
+            
+            if not os.path.exists(caminho_arquivo):
+                logger.error(f"Arquivo de orçamento não encontrado: {caminho_arquivo}")
+                return jsonify({
+                    'success': False,
+                    'error': 'Arquivo de orçamento não encontrado'
+                }), 404
+            
+            return send_file(
+                caminho_arquivo,
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=f"orcamento_{numero_orcamento}.pdf"
+            )
     except Exception as e:
         logger.error(f"Erro ao fazer download do orçamento: {str(e)}")
         return jsonify({
@@ -376,7 +469,9 @@ def init_app(app):
     Inicializa o blueprint com a aplicação Flask.
     """
     # Inicializar gerenciador de preços com a aplicação
-    gerenciador_precos.init_app(app)
+    gerenciador = app.config.get('GERENCIADOR_PRECOS', gerenciador_precos)
+    if hasattr(gerenciador, 'init_app'):
+        gerenciador.init_app(app)
     
     # Registrar blueprint
     app.register_blueprint(orcamentos_bp, url_prefix='/orcamentos') 

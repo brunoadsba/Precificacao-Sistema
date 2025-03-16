@@ -163,35 +163,35 @@ Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para m
 ## 🔧 Instalação
 
 1. Clone o repositório:
-\`\`\`bash
+```bash
 git clone https://github.com/seu-usuario/precificacao-sistema.git
 cd precificacao-sistema
-\`\`\`
+```
 
 2. Crie e ative um ambiente virtual:
-\`\`\`bash
+```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\\Scripts\\activate   # Windows
-\`\`\`
+```
 
 3. Instale as dependências:
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 4. Configure as variáveis de ambiente:
-Crie um arquivo \`.env\` na raiz do projeto com as seguintes variáveis:
-\`\`\`
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+```
 EMAIL_REMETENTE=seu-email@gmail.com
 EMAIL_SENHA=sua-senha-de-app
 SECRET_KEY=sua-chave-secreta
-\`\`\`
+```
 
 5. Execute a aplicação:
-\`\`\`bash
+```bash
 python app.py
-\`\`\`
+```
 
 ## 📝 Exemplos de Uso
 
@@ -338,6 +338,61 @@ Acesse a demonstração do sistema em: [Link para demonstração]
 ![image](https://github.com/user-attachments/assets/141a7894-aa09-4bc8-bfc3-663c98aea26b)
 
 ![image](https://github.com/user-attachments/assets/1a2b5e48-711d-4880-bfa8-6489ffa26e3c)
+
+## Implantação em Plataformas de Nuvem
+
+Este projeto está configurado para ser implantado em várias plataformas de nuvem, incluindo Vercel, Render e Firebase.
+
+### Implantação no Vercel
+
+1. Crie uma conta no [Vercel](https://vercel.com/) se ainda não tiver uma.
+2. Instale a CLI do Vercel:
+   ```bash
+   npm install -g vercel
+   ```
+3. Faça login na sua conta:
+   ```bash
+   vercel login
+   ```
+4. No diretório do projeto, execute:
+   ```bash
+   vercel
+   ```
+5. Siga as instruções para configurar o projeto.
+6. Configure as variáveis de ambiente no painel do Vercel, baseando-se no arquivo `.env.example`.
+7. Defina a variável `VERCEL=1` para ativar as configurações específicas do Vercel.
+
+### Implantação no Render
+
+1. Crie uma conta no [Render](https://render.com/) se ainda não tiver uma.
+2. Crie um novo Web Service e conecte ao seu repositório Git.
+3. Configure o serviço com as seguintes opções:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app`
+4. Configure as variáveis de ambiente no painel do Render, baseando-se no arquivo `.env.example`.
+5. Defina a variável `RENDER=1` para ativar as configurações específicas do Render.
+
+### Configuração do Firebase
+
+1. Crie um projeto no [Firebase](https://firebase.google.com/) se ainda não tiver um.
+2. Ative o Firestore Database e o Storage no console do Firebase.
+3. Gere uma chave de conta de serviço:
+   - Vá para Configurações do Projeto > Contas de serviço
+   - Clique em "Gerar nova chave privada"
+   - Salve o arquivo JSON gerado
+4. Configure as variáveis de ambiente com os dados do Firebase:
+   - `FIREBASE_CREDENTIALS`: Conteúdo do arquivo JSON da conta de serviço (como string)
+   - `FIREBASE_STORAGE_BUCKET`: Nome do bucket de armazenamento (geralmente `seu-projeto-id.appspot.com`)
+5. Para importar os dados CSV para o Firestore na primeira execução, defina `IMPORTAR_CSV_PARA_FIRESTORE=True`.
+
+## Arquitetura do Sistema
+
+O sistema foi projetado para funcionar tanto com armazenamento local quanto com serviços em nuvem:
+
+- **Em desenvolvimento**: Usa arquivos CSV locais e armazenamento de arquivos no sistema de arquivos.
+- **Em produção**: Usa o Firestore para dados e o Firebase Storage para arquivos.
+
+A aplicação detecta automaticamente o ambiente e usa os serviços apropriados.
 
 
 
