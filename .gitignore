@@ -1,5 +1,44 @@
+# Arquivos e pastas do ambiente virtual
 .env
 venv/
+.venv/
+
+# Arquivos de cache do Python
 __pycache__/
-*.pyc flask_session/*
+*.pyc
+*.pyo
+*.pyd
+
+# Pasta de sessões do Flask
+flask_session/
+flask_session/*
+
+# Arquivo de instalação do pip
 get-pip.py
+
+# Arquivos temporários e de log
+*.log
+*.tmp
+*.bak
+
+# Arquivos de configuração do VS Code (se não quiser versionar)
+.vscode/
+settings.json
+
+# Arquivos de dependências locais
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Arquivos de ambiente Nix (se estiver usando Nix)
+*.nix
+result
+
+# Outros arquivos comuns a ignorar
+.DS_Store  # Arquivos do macOS
+*.swp      # Arquivos temporários do Vim
+*.swo
+
+# Arquivos de documentação gerados
+docs/_build/
