@@ -19,7 +19,7 @@ class Config:
     # Em ambiente de produção (Vercel) usamos sessão baseada em cookies
     # Em desenvolvimento mantemos o filesystem
     if os.environ.get("VERCEL_ENV") == "production":
-        SESSION_TYPE = 'null'  # Usar cookies padrão gerenciados pelo Flask
+        SESSION_TYPE = 'cookie'  # Usar cookies gerenciados pelo Flask
     else:
         SESSION_TYPE = 'filesystem'  # Armazenar sessões em arquivos
         SESSION_FILE_DIR = os.path.join(os.getcwd(), 'flask_session')  # Diretório para armazenar arquivos de sessão

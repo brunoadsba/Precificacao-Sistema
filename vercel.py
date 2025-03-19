@@ -9,3 +9,6 @@ verificar_precos_csv()
 
 # Aplicação para a Vercel
 app.logger.info("Aplicação inicializada na Vercel") 
+
+# Exportar para a Vercel
+app = app 
