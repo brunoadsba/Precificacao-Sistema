@@ -16,11 +16,17 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv('EMAIL_REMETENTE')
     
     # Configurações da sessão
-    SESSION_TYPE = 'filesystem'  # Armazenar sessões em arquivos
+    # Em ambiente de produção (Vercel) usamos sessão baseada em cookies
+    # Em desenvolvimento mantemos o filesystem
+    if os.environ.get("VERCEL_ENV") == "production":
+        SESSION_TYPE = 'null'  # Usar cookies padrão gerenciados pelo Flask
+    else:
+        SESSION_TYPE = 'filesystem'  # Armazenar sessões em arquivos
+        SESSION_FILE_DIR = os.path.join(os.getcwd(), 'flask_session')  # Diretório para armazenar arquivos de sessão
+        SESSION_FILE_THRESHOLD = 500  # Número máximo de arquivos de sessão
+    
     SESSION_PERMANENT = True     # Tornar a sessão permanente
     PERMANENT_SESSION_LIFETIME = 3600  # Duração da sessão em segundos (1 hora)
     SESSION_USE_SIGNER = True    # Assinar cookies de sessão
-    SESSION_FILE_DIR = os.path.join(os.getcwd(), 'flask_session')  # Diretório para armazenar arquivos de sessão
-    SESSION_FILE_THRESHOLD = 500  # Número máximo de arquivos de sessão
     SESSION_KEY_PREFIX = 'precificacao_'  # Prefixo para chaves de sessão
     # Adicione outras configurações conforme necessário

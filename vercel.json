@@ -2,22 +2,22 @@
     "version": 2,
     "builds": [
       {
-        "src": "app.py",
+        "src": "vercel.py",
         "use": "@vercel/python"
       }
     ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/app.py"
+        "dest": "/vercel.py"
       }
     ],
     "env": {
       "FLASK_ENV": "production",
-      "FLASK_APP": "app.py"
+      "FLASK_APP": "vercel.py"
     },
     "functions": {
-      "app.py": {
+      "vercel.py": {
         "memory": 1024,
         "maxDuration": 60
       }
