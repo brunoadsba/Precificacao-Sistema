@@ -724,6 +724,42 @@ def gerar_pdf_orcamento(dados):
                         if linha.strip():
                             elements.append(Paragraph(f"• {linha.strip()}", styles['DetalheServico']))
             
+            # Adicionar informações de dias de coleta, se houver
+            if servico.get('multiplas_coletas') == 'sim' and servico.get('dias_coleta'):
+                elements.append(Paragraph(f"<b>Informações de Coleta ({servico.get('quantidade_dias', 1)} dias):</b>", styles['TextoNormal']))
+                
+                # Criar tabela para os dias de coleta
+                coleta_data = [['Dia', 'Data', 'Hora', 'Local', 'Observações']]
+                
+                for idx, dia in enumerate(servico['dias_coleta']):
+                    coleta_data.append([
+                        str(idx + 1),
+                        dia.get('data', ''),
+                        dia.get('hora', ''),
+                        dia.get('local', ''),
+                        dia.get('observacoes', '')
+                    ])
+                
+                # Criar e estilizar a tabela
+                coleta_table = Table(coleta_data, colWidths=[0.5*inch, 1.0*inch, 0.8*inch, 2.0*inch, 1.5*inch])
+                coleta_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (4, 0), colors.lightblue),
+                    ('TEXTCOLOR', (0, 0), (4, 0), colors.black),
+                    ('ALIGN', (0, 0), (4, 0), 'CENTER'),
+                    ('FONTNAME', (0, 0), (4, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (4, 0), 10),
+                    ('BOTTOMPADDING', (0, 0), (4, 0), 8),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                    ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                
+                elements.append(coleta_table)
+                elements.append(Spacer(1, 0.2*inch))
+            
             # Tabela com informações do serviço
             data = [
                 ["Quantidade", "Unidade", "Preço Unitário", "Preço Total"],

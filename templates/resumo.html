@@ -163,6 +163,36 @@
             
             {% if servico.multiplas_coletas %}
             <p><strong>Coletas em dias diferentes:</strong> Sim ({{ servico.quantidade_dias }} dias)</p>
+            
+            {% if servico.dias_coleta %}
+            <div class="dias-coleta">
+                <h4>Detalhes das Coletas</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Dia</th>
+                                <th>Data</th>
+                                <th>Hora</th>
+                                <th>Local</th>
+                                <th>Observações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dia in servico.dias_coleta %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ dia.data }}</td>
+                                <td>{{ dia.hora }}</td>
+                                <td>{{ dia.local }}</td>
+                                <td>{{ dia.observacoes }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
             {% endif %}
             
             {% if servico.tipo_amostrador %}
