@@ -584,7 +584,7 @@ def resumo_view():
         
         # Obter dados da sessão
         servicos = session.get('servicos', [])
-        email = session.get('cliente_email', '')  # Alterado para 'cliente_email' para consistência
+        email = session.get('cliente_email', '')  # Consistentemente usando 'cliente_email'
         telefone = session.get('telefone', '')
         empresa_cliente = session.get('empresa_cliente', '')
         subtotal_orcamento = session.get('subtotal_orcamento', 0)
@@ -677,8 +677,10 @@ def gerar_pdf_orcamento(dados):
         email_cliente = dados['email'] if dados['email'] else "Não informado"
         elements.append(Paragraph(f"<b>E-mail:</b> {email_cliente}", styles['TextoNormal']))
         
-        if dados['telefone']:
-            elements.append(Paragraph(f"<b>Telefone:</b> {dados['telefone']}", styles['TextoNormal']))
+        # Garantir que o telefone seja exibido mesmo se estiver vazio
+        telefone_cliente = dados['telefone'] if dados['telefone'] else "Não informado"
+        elements.append(Paragraph(f"<b>Telefone:</b> {telefone_cliente}", styles['TextoNormal']))
+        
         elements.append(Spacer(1, 0.2*inch))
         
         # Serviços
@@ -834,7 +836,7 @@ def gerar_orcamento():
         
         # Obter dados da sessão
         servicos = session.get('servicos', [])
-        email = session.get('cliente_email', '')  # Alterado para 'cliente_email' para consistência
+        email = session.get('cliente_email', '')  # Mantido como 'cliente_email' consistentemente
         telefone = session.get('telefone', '')
         empresa_cliente = session.get('empresa_cliente', '')
         subtotal_orcamento = session.get('subtotal_orcamento', 0)
@@ -1259,7 +1261,7 @@ def processar_formulario():
         
         # Armazenar na sessão
         session['servicos'] = servicos
-        session['email'] = cliente_email
+        session['cliente_email'] = cliente_email  # Garantir que usamos sempre 'cliente_email'
         session['telefone'] = telefone
         session['empresa_cliente'] = empresa_cliente
         session['subtotal_orcamento'] = total_orcamento
